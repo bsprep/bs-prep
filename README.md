@@ -23,15 +23,15 @@
 	<img src="https://img.shields.io/badge/Razorpay-Secure%20Payments-0c61f7?style=for-the-badge" alt="Razorpay" />
 </p>
 
-## Overview
+## What is BSPrep?
 
-BSPrep is a full-stack web platform focused on helping IITM BS learners stay consistent and exam-ready.
+BSPrep is a full-stack web platform focused on helping IITM BS learners stay consistent and exam-ready in Tamil & English.
 
 - Curated course pages and prep paths
 - Quiz prep and learner tools
 - Dashboard with profile and progress workflows
 - Community and support experiences
-- Secure backend-only payment flow
+- Secure backend-only payment flow with Razorpay
 - GPA Calculator with updated details
 
 ## Showcase
