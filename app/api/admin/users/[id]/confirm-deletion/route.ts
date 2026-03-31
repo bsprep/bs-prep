@@ -94,7 +94,10 @@ export async function POST(req: NextRequest, { params }: Params) {
     // Check attempts (max 3 attempts)
     if (otpRecord.attempts >= 3) {
       return NextResponse.json(
-        { error: 'Maximum OTP attempts exceeded. Please request a new one.' },
+        { 
+          message: 'Maximum OTP attempts exceeded. Please request a new one.',
+          attempts_remaining: 0
+        },
         { status: 429 }
       )
     }
@@ -109,7 +112,10 @@ export async function POST(req: NextRequest, { params }: Params) {
 
       const attemptsLeft = 3 - (otpRecord.attempts + 1)
       return NextResponse.json(
-        { error: `Invalid OTP. ${attemptsLeft} attempts remaining.` },
+        { 
+          message: `Invalid OTP`,
+          attempts_remaining: attemptsLeft
+        },
         { status: 401 }
       )
     }

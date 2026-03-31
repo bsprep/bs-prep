@@ -15,18 +15,24 @@ function generateOTP(): string {
 }
 
 // Helper to send OTP email (placeholder - implement with your email service)
-async function sendOTPEmail(email: string, otp: string, userName: string): Promise<boolean> {
+async function sendOTPEmail(email: string, otp: string, userName: string): Promise<{ success: boolean; message?: string }> {
   try {
     // TODO: Integrate with email service (SendGrid, Resend, AWS SES, etc.)
-    console.log(`OTP for ${email}: ${otp}`) // Debug log
+    // For development, log to console. In production, implement actual email sending.
+    console.log(`\n========================================`)
+    console.log(`OTP DELETION REQUEST for ${userName} (${email})`)
+    console.log(`OTP Code: ${otp}`)
+    console.log(`Valid for 15 minutes`)
+    console.log(`========================================\n`)
     
-    // Example using fetch to a third-party email service
-    // For now, just return true assuming email was sent
-    // In production, implement actual email sending
-    return true
+    // In production, uncomment and use your email service:
+    // const response = await fetch('https://api.sendgrid.com/v3/mail/send', { ... })
+    
+    // For now, return success (OTP visible in server logs)
+    return { success: true, message: 'OTP generated (check server logs for OTP code)' }
   } catch (error) {
     console.error('Failed to send OTP email:', error)
-    return false
+    return { success: false, message: 'Failed to generate OTP' }
   }
 }
 
@@ -125,13 +131,13 @@ export async function POST(req: NextRequest, { params }: Params) {
       )
     }
 
-    // Send OTP via email
+    // Send OTP via email (or log in development)
     const userName = targetProfile?.first_name || targetUser.email?.split('@')[0] || 'User'
-    const emailSent = await sendOTPEmail(targetUser.email || '', otp, userName)
+    const emailResult = await sendOTPEmail(targetUser.email || '', otp, userName)
 
-    if (!emailSent) {
+    if (!emailResult.success) {
       return NextResponse.json(
-        { error: 'Failed to send OTP email' },
+        { error: emailResult.message || 'Failed to generate OTP' },
         { status: 500 }
       )
     }
@@ -139,9 +145,12 @@ export async function POST(req: NextRequest, { params }: Params) {
     return NextResponse.json(
       {
         success: true,
-        message: 'OTP sent to user email',
+        message: 'OTP generated and ready for verification',
         email: targetUser.email,
         masked_email: targetUser.email ? `${targetUser.email.substring(0, 2)}***@${targetUser.email.split('@')[1]}` : 'user email',
+        // For development/testing only - remove in production once email service is integrated
+        otp_for_testing: process.env.NODE_ENV === 'development' ? otp : undefined,
+        otp_message: emailResult.message,
       },
       { status: 200 }
     )

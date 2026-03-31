@@ -27,6 +27,7 @@ export default function AdminUsersDirectoryPage() {
   const [deletionStatus, setDeletionStatus] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
   const [deletingUserEmail, setDeletingUserEmail] = useState("")
+  const [testingOTP, setTestingOTP] = useState("")
 
   // Edit profile state
   const [editingUserId, setEditingUserId] = useState<string | null>(null)
@@ -91,11 +92,18 @@ export default function AdminUsersDirectoryPage() {
       if (!res.ok) {
         setDeletionStatus(data.error || "Failed to initiate deletion")
         setDeletingUserId(null)
+        setIsProcessing(false)
         return
       }
 
       setOtpSent(true)
-      setDeletionStatus(`OTP sent to ${data.masked_email}. Please enter it below to confirm deletion.`)
+      // For development/testing - show the OTP if available
+      if (data.otp_for_testing) {
+        setTestingOTP(data.otp_for_testing)
+        setDeletionStatus(`DEV MODE: OTP Code = ${data.otp_for_testing}\n\nOTP sent to ${data.masked_email}.\nClick "Auto-fill Testing OTP" button below to use it.`)
+      } else {
+        setDeletionStatus(`OTP has been sent to ${data.masked_email}.\n\nPlease check email and enter the OTP code below.`)
+      }
     } catch (error) {
       setDeletionStatus("Failed to initiate deletion. Please try again.")
       setDeletingUserId(null)
@@ -122,11 +130,17 @@ export default function AdminUsersDirectoryPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setDeletionStatus(data.error || "Failed to confirm deletion")
+        const message = data.message || data.error || "Failed to confirm deletion"
+        const attemptsRemaining = data.attempts_remaining || 0
+        let errorMsg = `❌ ${message}`
+        if (attemptsRemaining > 0) {
+          errorMsg += `\n\nAttempts remaining: ${attemptsRemaining}`
+        }
+        setDeletionStatus(errorMsg)
         return
       }
 
-      setDeletionStatus(`User ${deletingUserEmail} has been successfully deleted.`)
+      setDeletionStatus(`✅ Account deleted successfully.\n\nAll user data has been permanently removed.`)
       setUsers(users.filter((u) => u.id !== deletingUserId))
       
       // Reset deletion flow after 2 seconds
@@ -135,9 +149,10 @@ export default function AdminUsersDirectoryPage() {
         setOtpSent(false)
         setOtpVerificationCode("")
         setDeletionStatus("")
+        setTestingOTP("")
       }, 2000)
     } catch (error) {
-      setDeletionStatus("Failed to confirm deletion. Please try again.")
+      setDeletionStatus("❌ Failed to confirm deletion. Please try again.")
     } finally {
       setIsProcessing(false)
     }
@@ -148,6 +163,13 @@ export default function AdminUsersDirectoryPage() {
     setOtpSent(false)
     setOtpVerificationCode("")
     setDeletionStatus("")
+    setTestingOTP("")
+  }
+
+  function autoFillTestOTP() {
+    if (testingOTP) {
+      setOtpVerificationCode(testingOTP)
+    }
   }
 
   function startEditProfile(user: DirectoryUser) {
@@ -351,7 +373,7 @@ export default function AdminUsersDirectoryPage() {
             </p>
 
             {deletionStatus && (
-              <div className={`mt-4 rounded-lg border px-3 py-2 text-xs ${
+              <div className={`mt-4 rounded-lg border px-3 py-2 text-xs whitespace-pre-wrap ${
                 deletionStatus.includes("successfully")
                   ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
                   : "border-rose-500/40 bg-rose-500/10 text-rose-300"
@@ -361,14 +383,25 @@ export default function AdminUsersDirectoryPage() {
             )}
 
             {otpSent && (
-              <input
-                type="text"
-                placeholder="Enter 6-digit OTP"
-                value={otpVerificationCode}
-                onChange={(e) => setOtpVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                maxLength={6}
-                className="mt-4 w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none placeholder:text-slate-500 text-center font-mono text-lg"
-              />
+              <div className="mt-4 space-y-2">
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otpVerificationCode}
+                  onChange={(e) => setOtpVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  maxLength={6}
+                  className="w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none placeholder:text-slate-500 text-center font-mono text-lg"
+                />
+                {testingOTP && (
+                  <button
+                    onClick={autoFillTestOTP}
+                    type="button"
+                    className="w-full rounded-lg border border-slate-500/40 bg-slate-500/10 px-3 py-1 text-xs font-semibold text-slate-300 hover:bg-slate-500/20"
+                  >
+                    Auto-fill Testing OTP ({testingOTP})
+                  </button>
+                )}
+              </div>
             )}
 
             <div className="mt-6 flex gap-2">
