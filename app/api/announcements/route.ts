@@ -1,7 +1,31 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server"
 import { validateAndSanitizeInput, validateRequiredFields } from "@/lib/security/validation"
 import { apiRateLimiter, writeRateLimiter } from "@/lib/rate-limit"
+import { hasAdminRole } from "@/lib/security/admin-role"
+import { sendAnnouncementCreatedEmail } from "@/lib/notifications/announcement-email"
+
+function parseAnnouncementDate(dateInput: unknown): string | null {
+  if (!dateInput || typeof dateInput !== "string") {
+    return null
+  }
+
+  const parsed = new Date(dateInput)
+  if (Number.isNaN(parsed.getTime())) {
+    return null
+  }
+
+  return parsed.toISOString()
+}
+
+function isMissingColumnError(error: unknown, columnName: string): boolean {
+  if (!error || typeof error !== "object") {
+    return false
+  }
+
+  const e = error as { code?: string; message?: string }
+  return e.code === "PGRST204" && (e.message || "").includes(`'${columnName}'`)
+}
 
 // GET: fetch announcements - public endpoint
 export async function GET(request: NextRequest) {
@@ -27,7 +51,39 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(data)
+    const creatorIds = Array.from(
+      new Set(
+        (data ?? [])
+          .map((item: Record<string, unknown>) => item.created_by)
+          .filter((value): value is string => typeof value === "string")
+      )
+    )
+
+    const profileEmailById = new Map<string, string>()
+    if (creatorIds.length > 0) {
+      const service = createServiceRoleClient()
+      const { data: creatorProfiles } = await service
+        .from("profiles")
+        .select("id, email")
+        .in("id", creatorIds)
+
+      for (const profile of creatorProfiles ?? []) {
+        if (profile.id && profile.email) {
+          profileEmailById.set(profile.id, profile.email)
+        }
+      }
+    }
+
+    const normalized = (data ?? []).map((item: Record<string, unknown>) => ({
+      ...item,
+      message: (item.message as string | undefined) ?? (item.content as string | undefined) ?? "",
+      created_by_email:
+        (item.created_by_email as string | undefined) ??
+        (typeof item.created_by === "string" ? profileEmailById.get(item.created_by) : undefined) ??
+        null,
+    }))
+
+    return NextResponse.json(normalized)
   } catch (err) {
     console.error('Unexpected error:', err)
     return NextResponse.json(
@@ -57,14 +113,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase
-      .from("user_profiles_extended")
-      .select("role")
-      .eq("id", user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
+    // Check if user is admin using the same source as admin portal
+    const isAdmin = await hasAdminRole(user.id, user.email)
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Forbidden - Admin access required" },
         { status: 403 }
@@ -82,8 +133,10 @@ export async function POST(req: NextRequest) {
 
     const body = JSON.parse(text)
     
+    const message = body.message ?? body.content
+
     // Validate required fields
-    const validation = validateRequiredFields(body, ['title', 'content'])
+    const validation = validateRequiredFields({ title: body.title, message }, ['title', 'message'])
     if (!validation.valid) {
       return NextResponse.json(
         { error: `Missing required fields: ${validation.missing.join(', ')}` },
@@ -93,7 +146,7 @@ export async function POST(req: NextRequest) {
 
     // Validate and sanitize inputs
     const titleValidation = validateAndSanitizeInput(body.title, 200)
-    const contentValidation = validateAndSanitizeInput(body.content, 5000)
+    const messageValidation = validateAndSanitizeInput(message, 5000)
 
     if (!titleValidation.valid) {
       return NextResponse.json(
@@ -102,21 +155,47 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (!contentValidation.valid) {
+    if (!messageValidation.valid) {
       return NextResponse.json(
-        { error: `Invalid content: ${contentValidation.errors.join(', ')}` },
+        { error: `Invalid message: ${messageValidation.errors.join(', ')}` },
         { status: 400 }
       )
     }
 
-    // Insert announcement
-    const { data, error } = await supabase
+    const parsedDate = parseAnnouncementDate(body.date)
+    if (body.date && !parsedDate) {
+      return NextResponse.json(
+        { error: "Invalid date format" },
+        { status: 400 }
+      )
+    }
+
+    const adminClient = createServiceRoleClient()
+
+    const payloadWithCreator = {
+      title: titleValidation.sanitized,
+      message: messageValidation.sanitized,
+      created_by: user.id,
+      created_by_email: user.email ?? null,
+      ...(parsedDate ? { created_at: parsedDate } : {}),
+    }
+
+    const payloadWithoutCreator = {
+      title: titleValidation.sanitized,
+      message: messageValidation.sanitized,
+      ...(parsedDate ? { created_at: parsedDate } : {}),
+    }
+
+    let { data, error } = await adminClient
       .from("announcements")
-      .insert([{ 
-        title: titleValidation.sanitized, 
-        content: contentValidation.sanitized 
-      }])
+      .insert([payloadWithCreator])
       .select()
+
+    if (error && (isMissingColumnError(error, "created_by_email") || isMissingColumnError(error, "created_by"))) {
+      const retry = await adminClient.from("announcements").insert([payloadWithoutCreator]).select()
+      data = retry.data
+      error = retry.error
+    }
 
     if (error) {
       console.error('Announcement creation error:', error)
@@ -126,7 +205,27 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    return NextResponse.json(data[0], { status: 201 })
+    const announcement = data?.[0]
+
+    try {
+      await sendAnnouncementCreatedEmail({
+        title: titleValidation.sanitized,
+        message: messageValidation.sanitized,
+        createdByEmail: user.email ?? null,
+      })
+    } catch (mailError) {
+      // Email failures should not block announcement creation.
+      console.error("Announcement email dispatch failed:", mailError)
+    }
+
+    return NextResponse.json(
+      {
+        ...announcement,
+        message: announcement?.message ?? announcement?.content ?? "",
+        created_by_email: announcement?.created_by_email ?? user.email ?? null,
+      },
+      { status: 201 }
+    )
   } catch (err) {
     console.error('Unexpected error:', err)
     return NextResponse.json(
