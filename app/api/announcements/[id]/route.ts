@@ -29,6 +29,21 @@ function parseAnnouncementDate(dateInput: unknown): string | null {
   return parsed.toISOString()
 }
 
+// Valid announcement types
+const VALID_ANNOUNCEMENT_TYPES = ['Live Classes', 'YouTube Videos', 'Announcements', 'General']
+
+function validateAnnouncementType(type: unknown): { valid: boolean; type: string } {
+  if (!type || typeof type !== 'string') {
+    return { valid: true, type: 'General' } // Default to General
+  }
+
+  if (VALID_ANNOUNCEMENT_TYPES.includes(type)) {
+    return { valid: true, type }
+  }
+
+  return { valid: false, type: 'General' }
+}
+
 async function assertAdmin() {
   const authClient = await createClient()
 
@@ -106,9 +121,19 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: "Invalid date format" }, { status: 400 })
     }
 
+    // Validate announcement type
+    const typeValidation = validateAnnouncementType(body.announcement_type)
+    if (!typeValidation.valid) {
+      return NextResponse.json(
+        { error: `Invalid announcement type. Valid types are: ${VALID_ANNOUNCEMENT_TYPES.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
     const updatePayload: Record<string, string> = {
       title: titleValidation.sanitized,
       message: messageValidation.sanitized,
+      announcement_type: typeValidation.type,
     }
 
     if (parsedDate) {

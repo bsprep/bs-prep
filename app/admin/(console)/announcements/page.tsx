@@ -7,8 +7,24 @@ type Announcement = {
   title: string
   message: string
   content?: string
+  announcement_type?: string
   created_by_email?: string | null
   created_at: string
+}
+
+const ANNOUNCEMENT_TYPES = ['Live Classes', 'YouTube Videos', 'Announcements', 'General']
+
+function getAnnouncementTypeColor(type?: string): string {
+  switch (type) {
+    case 'Live Classes':
+      return 'border-purple-500/40 bg-purple-500/10 text-purple-300'
+    case 'YouTube Videos':
+      return 'border-red-500/40 bg-red-500/10 text-red-300'
+    case 'Announcements':
+      return 'border-blue-500/40 bg-blue-500/10 text-blue-300'
+    default:
+      return 'border-white/20 bg-white/5 text-slate-300'
+  }
 }
 
 function toInputDateTime(value?: string): string {
@@ -31,12 +47,14 @@ export default function AdminAnnouncementsPage() {
 
   const [title, setTitle] = useState("")
   const [messageText, setMessageText] = useState("")
+  const [announcementType, setAnnouncementType] = useState<string>("General")
   const [date, setDate] = useState("")
   const [loadingCreate, setLoadingCreate] = useState(false)
 
   const [editingId, setEditingId] = useState<string | number | null>(null)
   const [editTitle, setEditTitle] = useState("")
   const [editMessage, setEditMessage] = useState("")
+  const [editAnnouncementType, setEditAnnouncementType] = useState<string>("General")
   const [editDate, setEditDate] = useState("")
   const [loadingEdit, setLoadingEdit] = useState(false)
 
@@ -79,6 +97,7 @@ export default function AdminAnnouncementsPage() {
       body: JSON.stringify({
         title,
         message: messageText,
+        announcement_type: announcementType,
         date,
       }),
     })
@@ -91,6 +110,7 @@ export default function AdminAnnouncementsPage() {
       setStatusMessage("Announcement added successfully")
       setTitle("")
       setMessageText("")
+      setAnnouncementType("General")
       setDate("")
       await loadAnnouncements()
     }
@@ -102,6 +122,7 @@ export default function AdminAnnouncementsPage() {
     setEditingId(announcement.id)
     setEditTitle(announcement.title)
     setEditMessage(announcement.message || announcement.content || "")
+    setEditAnnouncementType(announcement.announcement_type || "General")
     setEditDate(toInputDateTime(announcement.created_at))
     setStatusMessage("")
   }
@@ -110,6 +131,7 @@ export default function AdminAnnouncementsPage() {
     setEditingId(null)
     setEditTitle("")
     setEditMessage("")
+    setEditAnnouncementType("General")
     setEditDate("")
   }
 
@@ -130,6 +152,7 @@ export default function AdminAnnouncementsPage() {
       body: JSON.stringify({
         title: editTitle,
         message: editMessage,
+        announcement_type: editAnnouncementType,
         date: editDate,
       }),
     })
@@ -188,6 +211,18 @@ export default function AdminAnnouncementsPage() {
             className="w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none placeholder:text-slate-500"
           />
 
+          <select
+            value={announcementType}
+            onChange={(e) => setAnnouncementType(e.target.value)}
+            className="w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none"
+          >
+            {ANNOUNCEMENT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+
           <textarea
             placeholder="Message"
             value={messageText}
@@ -223,7 +258,12 @@ export default function AdminAnnouncementsPage() {
         <div className="mt-4 space-y-3">
           {!loadingList && announcements.map((a) => (
             <article key={a.id} className="rounded-xl border border-white/10 bg-[#0a101c] p-4">
-              <h3 className="font-semibold text-slate-100">{a.title}</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-semibold text-slate-100">{a.title}</h3>
+                <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${getAnnouncementTypeColor(a.announcement_type)}`}>
+                  {a.announcement_type || 'General'}
+                </span>
+              </div>
               <p className="mt-2 text-sm text-slate-300 whitespace-pre-wrap">{a.message || a.content || ""}</p>
               <p className="mt-2 text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</p>
               <p className="mt-1 text-xs text-slate-500">Created by: {a.created_by_email || "Admin"}</p>
@@ -260,6 +300,18 @@ export default function AdminAnnouncementsPage() {
               required
               className="w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none placeholder:text-slate-500"
             />
+
+            <select
+              value={editAnnouncementType}
+              onChange={(e) => setEditAnnouncementType(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-[#0b1220] px-3 py-2 text-slate-100 outline-none"
+            >
+              {ANNOUNCEMENT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
 
             <textarea
               placeholder="Message"

@@ -27,6 +27,21 @@ function isMissingColumnError(error: unknown, columnName: string): boolean {
   return e.code === "PGRST204" && (e.message || "").includes(`'${columnName}'`)
 }
 
+// Valid announcement types
+const VALID_ANNOUNCEMENT_TYPES = ['Live Classes', 'YouTube Videos', 'Announcements', 'General']
+
+function validateAnnouncementType(type: unknown): { valid: boolean; type: string } {
+  if (!type || typeof type !== 'string') {
+    return { valid: true, type: 'General' } // Default to General
+  }
+
+  if (VALID_ANNOUNCEMENT_TYPES.includes(type)) {
+    return { valid: true, type }
+  }
+
+  return { valid: false, type: 'General' }
+}
+
 // GET: fetch announcements - public endpoint
 export async function GET(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
@@ -170,9 +185,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validate announcement type
+    const typeValidation = validateAnnouncementType(body.announcement_type)
+    if (!typeValidation.valid) {
+      return NextResponse.json(
+        { error: `Invalid announcement type. Valid types are: ${VALID_ANNOUNCEMENT_TYPES.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
     const adminClient = createServiceRoleClient()
 
-    const payloadWithCreator = {
+    // Build payload with creator info
+    const payloadWithCreator: Record<string, unknown> = {
       title: titleValidation.sanitized,
       message: messageValidation.sanitized,
       created_by: user.id,
@@ -180,10 +205,20 @@ export async function POST(req: NextRequest) {
       ...(parsedDate ? { created_at: parsedDate } : {}),
     }
 
-    const payloadWithoutCreator = {
+    // Include announcement_type if it's valid (handle DB schema differences)
+    if (typeValidation.type) {
+      payloadWithCreator.announcement_type = typeValidation.type
+    }
+
+    const payloadWithoutCreator: Record<string, unknown> = {
       title: titleValidation.sanitized,
       message: messageValidation.sanitized,
       ...(parsedDate ? { created_at: parsedDate } : {}),
+    }
+
+    // Include announcement_type in payload without creator too
+    if (typeValidation.type) {
+      payloadWithoutCreator.announcement_type = typeValidation.type
     }
 
     let { data, error } = await adminClient
@@ -191,8 +226,14 @@ export async function POST(req: NextRequest) {
       .insert([payloadWithCreator])
       .select()
 
-    if (error && (isMissingColumnError(error, "created_by_email") || isMissingColumnError(error, "created_by"))) {
-      const retry = await adminClient.from("announcements").insert([payloadWithoutCreator]).select()
+    // If column doesn't exist in DB yet, retry without it
+    if (error && (isMissingColumnError(error, "created_by_email") || isMissingColumnError(error, "created_by") || isMissingColumnError(error, "announcement_type"))) {
+      const fallbackPayload = {
+        title: titleValidation.sanitized,
+        message: messageValidation.sanitized,
+        ...(parsedDate ? { created_at: parsedDate } : {}),
+      }
+      const retry = await adminClient.from("announcements").insert([fallbackPayload]).select()
       data = retry.data
       error = retry.error
     }
