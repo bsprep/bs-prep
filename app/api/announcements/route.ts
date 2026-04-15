@@ -4,7 +4,6 @@ import { createClient, createServiceRoleClient } from "@/lib/supabase/server"
 import { sanitizeString, validateRequiredFields } from "@/lib/security/validation"
 import { apiRateLimiter, writeRateLimiter } from "@/lib/rate-limit"
 import { hasAdminRole } from "@/lib/security/admin-role"
-import { sendAnnouncementCreatedEmail } from "@/lib/notifications/announcement-email"
 
 function parseDisplayHours(value: unknown): number | null {
   if (value === undefined || value === null || value === "") {
@@ -261,17 +260,6 @@ export async function POST(req: NextRequest) {
     }
 
     const announcement = data?.[0]
-
-    try {
-      await sendAnnouncementCreatedEmail({
-        title: sanitizedTitle,
-        message: sanitizedMessage,
-        createdByEmail: user.email ?? null,
-      })
-    } catch (mailError) {
-      // Email failures should not block announcement creation.
-      console.error("Announcement email dispatch failed:", mailError)
-    }
 
     return NextResponse.json(
       {

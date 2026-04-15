@@ -4,6 +4,7 @@ import Razorpay from "razorpay";
 import { verifyUserFromToken, createServiceRoleClient } from "@/lib/supabase/server";
 import { constantTimeCompare } from "@/lib/validation";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+import { sendCourseWelcomeEmail } from "@/lib/notifications/course-welcome-email";
 
 const coursePricing: Record<string, number> = {
   "qualifier-math-1": 9900,
@@ -11,6 +12,13 @@ const coursePricing: Record<string, number> = {
   "qualifier-computational-thinking": 9900,
   bundle: 24900,
 };
+
+const courseFallbackTitles: Record<string, string> = {
+  "qualifier-math-1": "Mathematics 1",
+  "qualifier-stats-1": "Statistics 1",
+  "qualifier-computational-thinking": "Computational Thinking",
+  bundle: "Qualifier Bundle",
+}
 
 function getRazorpayClient() {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -50,8 +58,61 @@ async function submitPaymentLeadToGoogleForm(name: string, email: string, phone:
   }
 }
 
+function toAbsoluteAssetUrl(assetPath: string | null | undefined, siteUrl: string): string | null {
+  if (!assetPath) {
+    return null
+  }
+
+  if (assetPath.startsWith("http://") || assetPath.startsWith("https://")) {
+    return assetPath
+  }
+
+  const normalizedPath = assetPath.startsWith("/") ? assetPath : `/${assetPath}`
+  return new URL(normalizedPath, siteUrl).toString()
+}
+
+function resolveCourseEmailData(
+  enrollmentIds: string[],
+  courseRows: Array<{ id: string; title: string; thumbnail: string | null }> | null | undefined,
+  siteUrl: string
+): Array<{ title: string; thumbnailUrl: string | null }> {
+  return enrollmentIds.map((courseId) => {
+    const match = courseRows?.find((row) => row.id === courseId)
+    const title = match?.title || courseFallbackTitles[courseId] || courseId
+    const thumbnailUrl = toAbsoluteAssetUrl(match?.thumbnail ?? null, siteUrl)
+
+    return {
+      title,
+      thumbnailUrl,
+    }
+  })
+}
+
+async function updateWelcomeEmailStatus(
+  supabase: ReturnType<typeof createServiceRoleClient>,
+  razorpayPaymentId: string,
+  sentAt: string | null,
+  errorMessage: string | null
+) {
+  const updatePayload: Record<string, string | null> = {
+    welcome_email_sent_at: sentAt,
+    welcome_email_error: errorMessage,
+  }
+
+  const { error } = await supabase
+    .from("payment_orders")
+    .update(updatePayload)
+    .eq("razorpay_payment_id", razorpayPaymentId)
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bsprep.in"
+
     // Rate limiting: 50 verification attempts per 15 minutes per user
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
@@ -158,13 +219,61 @@ export async function POST(request: NextRequest) {
 
     const { data: existingPayment } = await supabase
       .from("payment_orders")
-      .select("id, user_id")
+      .select("id, user_id, welcome_email_sent_at")
       .eq("razorpay_payment_id", razorpay_payment_id)
       .maybeSingle();
 
     if (existingPayment) {
       if (existingPayment.user_id !== userId) {
         return NextResponse.json({ error: "Duplicate payment conflict" }, { status: 409 });
+      }
+
+      if (!existingPayment.welcome_email_sent_at) {
+        const isBundle = expectedCourseId === "bundle";
+        const enrollmentIds = isBundle
+          ? [
+              "qualifier-math-1",
+              "qualifier-stats-1",
+              "qualifier-computational-thinking",
+            ]
+          : [expectedCourseId];
+
+        const { data: courseRows, error: courseError } = await supabase
+          .from("courses")
+          .select("id, title, thumbnail")
+          .in("id", enrollmentIds);
+
+        if (courseError) {
+          console.error("Course lookup error for welcome email:", courseError);
+        }
+
+        const courses = resolveCourseEmailData(enrollmentIds, courseRows, siteUrl)
+
+        try {
+          await sendCourseWelcomeEmail({
+            studentName: payerName || "there",
+            studentEmail: payerEmail,
+            courses,
+          });
+
+          await updateWelcomeEmailStatus(
+            supabase,
+            razorpay_payment_id,
+            new Date().toISOString(),
+            null
+          )
+        } catch (welcomeEmailError) {
+          console.error("Welcome email retry failed:", welcomeEmailError);
+
+          await updateWelcomeEmailStatus(
+            supabase,
+            razorpay_payment_id,
+            null,
+            welcomeEmailError instanceof Error ? welcomeEmailError.message : "Unknown email error"
+          ).catch((updateError) => {
+            console.error("Failed to update welcome email error state:", updateError)
+          })
+        }
       }
 
       return NextResponse.json({
@@ -222,6 +331,43 @@ export async function POST(request: NextRequest) {
         { error: "Failed to enroll in course" },
         { status: 500 }
       );
+    }
+
+    const { data: courseRows, error: courseError } = await supabase
+      .from("courses")
+      .select("id, title, thumbnail")
+      .in("id", enrollmentIds);
+
+    if (courseError) {
+      console.error("Course lookup error for welcome email:", courseError);
+    }
+
+    const courses = resolveCourseEmailData(enrollmentIds, courseRows, siteUrl)
+
+    try {
+      await sendCourseWelcomeEmail({
+        studentName: payerName || "there",
+        studentEmail: payerEmail,
+        courses,
+      });
+
+      await updateWelcomeEmailStatus(
+        supabase,
+        razorpay_payment_id,
+        new Date().toISOString(),
+        null
+      )
+    } catch (welcomeEmailError) {
+      console.error("Welcome email send failed:", welcomeEmailError);
+
+      await updateWelcomeEmailStatus(
+        supabase,
+        razorpay_payment_id,
+        null,
+        welcomeEmailError instanceof Error ? welcomeEmailError.message : "Unknown email error"
+      ).catch((updateError) => {
+        console.error("Failed to update welcome email error state:", updateError)
+      })
     }
 
     // Payment is verified and access is granted. Now send the captured checkout details to Google Form.
