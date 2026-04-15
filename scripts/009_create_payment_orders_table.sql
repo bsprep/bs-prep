@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS payment_orders (
   razorpay_payment_id TEXT NOT NULL UNIQUE,
   is_bundle BOOLEAN DEFAULT false,
   status TEXT NOT NULL DEFAULT 'completed', -- pending, completed, failed
+  welcome_email_sent_at TIMESTAMP WITH TIME ZONE,
+  welcome_email_error TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
