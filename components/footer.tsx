@@ -9,7 +9,7 @@ const developers: {name: string; photo: string; linkedin: string; github: string
 const _developers_data = [
   {
     name: "Prodhosh VS",
-    photo: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/developers/prodhosh_photo.jpeg",
+    photo: "/developers/prodhosh_photo.jpeg",
     linkedin: "https://www.linkedin.com/in/prodhoshvs/",
     github: "https://github.com/PRODHOSH",
     instagram: "https://www.instagram.com/itzprodhosh/",
@@ -21,7 +21,7 @@ const _developers_data = [
   },
   {
     name: "Saran V",
-    photo: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/developers/saran.jpg",
+    photo: "/developers/saran.jpg",
     linkedin: "https://www.linkedin.com/in/saran-v-7060b1385",
     github: "https://github.com/saranv007",
     instagram: "https://www.instagram.com/itz_sano_x",
@@ -32,7 +32,7 @@ const _developers_data = [
   },
   {
     name: "Rishwanth S V",
-    photo: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/developers/rishwanth.jpg",
+    photo: "/developers/rishwanth.jpg",
     linkedin: "https://www.linkedin.com/in/RishSV/",
     github: "https://github.com/rishsv/",
     instagram: "https://www.instagram.com/rish.offcl",

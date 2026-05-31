@@ -30,7 +30,7 @@ const BUNDLE_COURSES = [
     id: "qualifier-math-1",
     title: "Mathematics for Data Science I",
     description: "Fundamental math concepts essential for data science",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/math.png",
+    thumbnail: "/courses/math.png",
     weeks: 4,
     individualPrice: 149,
     syllabus: [
@@ -44,7 +44,7 @@ const BUNDLE_COURSES = [
     id: "qualifier-stats-1",
     title: "Statistics for Data Science I",
     description: "Statistical thinking and analysis from the ground up",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/stats.png",
+    thumbnail: "/courses/stats.png",
     weeks: 4,
     individualPrice: 149,
     syllabus: [
@@ -58,7 +58,7 @@ const BUNDLE_COURSES = [
     id: "qualifier-computational-thinking",
     title: "Computational Thinking",
     description: "Problem-solving and algorithmic thinking fundamentals",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/ct.png",
+    thumbnail: "/courses/ct.png",
     weeks: 4,
     individualPrice: 149,
     syllabus: [
@@ -72,7 +72,7 @@ const BUNDLE_COURSES = [
     id: "qualifier-english-1",
     title: "English I",
     description: "Build strong spoken and written English foundations",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/english.png",
+    thumbnail: "/courses/english.png",
     weeks: 4,
     individualPrice: 149,
     syllabus: [
@@ -181,7 +181,7 @@ export default function PackageDealPage() {
         currency: "INR",
         name: "BSPrep",
         description: "Qualifier Bundle — All 4 Courses",
-        image: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/logo.jpeg",
+        image: "/logo.jpeg",
         order_id: orderData.orderId,
         prefill: {
           name: formData.name,

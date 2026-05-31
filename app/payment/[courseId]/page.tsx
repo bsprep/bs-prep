@@ -30,7 +30,7 @@ const coursePaymentData: Record<string, any> = {
     price: 129,
     originalPrice: 149,
     description: "Fundamental mathematics concepts for data science",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/math.png",
+    thumbnail: "/courses/math.png",
     weeks: 4,
   },
   "qualifier-stats-1": {
@@ -39,7 +39,7 @@ const coursePaymentData: Record<string, any> = {
     price: 129,
     originalPrice: 149,
     description: "Introduction to statistical thinking and analysis",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/stats.png",
+    thumbnail: "/courses/stats.png",
     weeks: 4,
   },
   "qualifier-computational-thinking": {
@@ -48,7 +48,7 @@ const coursePaymentData: Record<string, any> = {
     price: 129,
     originalPrice: 149,
     description: "Problem-solving and algorithmic thinking fundamentals",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/ct.png",
+    thumbnail: "/courses/ct.png",
     weeks: 4,
   },
   "qualifier-english-1": {
@@ -57,7 +57,7 @@ const coursePaymentData: Record<string, any> = {
     price: 129,
     originalPrice: 149,
     description: "Build core English communication skills for IITM BS.",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/english.png",
+    thumbnail: "/courses/english.png",
     weeks: 4,
   },
 }
@@ -159,7 +159,7 @@ export default function PaymentPage() {
         currency: 'INR',
         name: 'BSPrep',
         description: course.title,
-        image: 'https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/logo.jpeg',
+        image: '/logo.jpeg',
         order_id: orderData.orderId,
         
         // Prefill customer details

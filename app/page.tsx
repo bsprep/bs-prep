@@ -49,9 +49,9 @@ export default function HomePage() {
   const faqRef = useScrollReveal<HTMLElement>({ threshold: 0.1 })
 
   const courseCards = [
-    { image: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-1.png", title: "Mathematics for Data Science I" },
-    { image: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-2.png", title: "Statistics for Data Science I" },
-    { image: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-3.png", title: "Computational Thinking" }
+    { image: "/hero-section/image-1.png", title: "Mathematics for Data Science I" },
+    { image: "/hero-section/image-2.png", title: "Statistics for Data Science I" },
+    { image: "/hero-section/image-3.png", title: "Computational Thinking" }
   ]
 
   const faqs = [
@@ -125,21 +125,21 @@ export default function HomePage() {
               >
                 <SwapCard>
                   <img
-                    src="https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-1.png"
+                    src="/hero-section/image-1.png"
                     alt="Mathematics for Data Science I"
                     className="w-full h-full object-cover"
                   />
                 </SwapCard>
                 <SwapCard>
                   <img
-                    src="https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-2.png"
+                    src="/hero-section/image-2.png"
                     alt="Statistics for Data Science I"
                     className="w-full h-full object-cover"
                   />
                 </SwapCard>
                 <SwapCard>
                   <img
-                    src="https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/hero-section/image-3.png"
+                    src="/hero-section/image-3.png"
                     alt="Computational Thinking"
                     className="w-full h-full object-cover"
                   />
@@ -264,28 +264,28 @@ export default function HomePage() {
                 id: "qualifier-math-1",
                 title: "Mathematics for Data Science I",
                 description: "Master fundamental math concepts",
-                thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/math.png",
+                thumbnail: "/courses/math.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-stats-1",
                 title: "Statistics for Data Science I",
                 description: "Learn statistical thinking & analysis",
-                thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/stats.png",
+                thumbnail: "/courses/stats.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-computational-thinking",
                 title: "Computational Thinking",
                 description: "Build problem-solving skills",
-                thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/ct.png",
+                thumbnail: "/courses/ct.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-english-1",
                 title: "English I",
                 description: "Build core English communication skills",
-                thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/english.png",
+                thumbnail: "/courses/english.png",
                 price: 129, originalPrice: 149
               }
             ].map((course) => (
