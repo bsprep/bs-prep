@@ -264,28 +264,28 @@ export default function HomePage() {
                 id: "qualifier-math-1",
                 title: "Mathematics for Data Science I",
                 description: "Master fundamental math concepts",
-                thumbnail: "/courses/math.png",
+                thumbnail: "public/courses/math.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-stats-1",
                 title: "Statistics for Data Science I",
                 description: "Learn statistical thinking & analysis",
-                thumbnail: "/courses/stats.png",
+                thumbnail: "public/courses/stats.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-computational-thinking",
                 title: "Computational Thinking",
                 description: "Build problem-solving skills",
-                thumbnail: "/courses/ct.png",
+                thumbnail: "public/courses/ct.png",
                 price: 129, originalPrice: 149
               },
               {
                 id: "qualifier-english-1",
                 title: "English I",
                 description: "Build core English communication skills",
-                thumbnail: "/courses/english.png",
+                thumbnail: "public/courses/english.png",
                 price: 129, originalPrice: 149
               }
             ].map((course) => (
