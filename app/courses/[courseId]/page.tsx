@@ -32,7 +32,7 @@ const courseSyllabusData: Record<string, any> = {
     level: "qualifier",
     price: 129, originalPrice: 149,
     description: "Fundamental mathematics concepts for data science",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/math.png",
+    thumbnail: "/courses/math.png",
     syllabus: [
       {
         week: 1,
@@ -61,7 +61,7 @@ const courseSyllabusData: Record<string, any> = {
     level: "qualifier",
     price: 129, originalPrice: 149,
     description: "Introduction to statistical thinking and analysis",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/stats.png",
+    thumbnail: "/courses/stats.png",
     syllabus: [
       {
         week: 1,
@@ -90,7 +90,7 @@ const courseSyllabusData: Record<string, any> = {
     level: "qualifier",
     price: 129, originalPrice: 149,
     description: "Problem-solving and algorithmic thinking fundamentals",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/ct.png",
+    thumbnail: "/courses/ct.png",
     syllabus: [
       {
         week: 1,
@@ -119,7 +119,7 @@ const courseSyllabusData: Record<string, any> = {
     level: "qualifier",
     price: 129, originalPrice: 149,
     description: "Build core spoken and written English skills for IITM BS.",
-    thumbnail: "https://cdn.jsdelivr.net/gh/PRODHOSH/bs-prep@main/public/courses/english.png",
+    thumbnail: "/courses/english.png",
     syllabus: [
       {
         week: 1,

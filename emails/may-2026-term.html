@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>May 2026 Qualifier Prep is Open — BSPrep</title>
+  <!--
+    SUBJECT LINE (pick one):
+    A) "Your Qualifier is in a few weeks. Are you prepared?"
+    B) "500+ students are already prepping for May 2026. Here's how."
+    C) "Most students fail the Qualifier because of this one thing."
+
+    PREVIEW TEXT (paste after subject in Resend):
+    Tamil video lectures, live mentors, quizzes. Everything you need to pass in one place. Enroll now.
+  -->
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: #f0ede8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #1a1a1a;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; border: 0; outline: none; }
+
+    .wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px 20px;
+    }
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topbar-logo-img {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .topbar-logo-name {
+      font-size: 15px; font-weight: 700; color: #0a0a0a; line-height: 1;
+    }
+    .topbar-logo-sub {
+      font-size: 11px; color: #999; margin-top: 2px;
+    }
+    .topbar-link {
+      font-size: 11px; color: #999;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── Hero image ── */
+    .hero-img {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .hero-img img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #ffffff;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    /* ── Dark header ── */
+    .dark-header {
+      background: #0a0a0a;
+      padding: 32px 36px 28px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 100px;
+      margin-bottom: 16px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+    }
+    .dark-header h1 {
+      color: #ffffff;
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .dark-header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    /* ── Stats strip ── */
+    .stats {
+      display: flex;
+      background: #111;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item {
+      flex: 1;
+      padding: 14px 20px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .stat-label {
+      color: rgba(255,255,255,0.35);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-top: 3px;
+    }
+
+    /* ── Body ── */
+    .body { padding: 36px 36px 8px; }
+    .body p {
+      font-size: 15px;
+      color: #3d3d3d;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+    .body p strong { color: #0a0a0a; font-weight: 700; }
+
+    /* ── Early CTA ── */
+    .early-cta-wrap {
+      padding: 0 36px 32px;
+    }
+    .cta-btn {
+      display: block;
+      background: #0a0a0a;
+      color: #ffffff !important;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 16px 24px;
+      border-radius: 14px;
+      letter-spacing: 0.01em;
+    }
+    .cta-note {
+      text-align: center;
+      font-size: 11px;
+      color: #b8b8b8;
+      margin-top: 8px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin: 28px 36px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      padding: 0 36px;
+      font-size: 11px;
+      color: #aaaaaa;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    /* ── Course grid ── */
+    .course-grid-wrap { padding: 0 36px; margin-bottom: 28px; }
+    .course-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .course-tile {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+    }
+    .course-tile img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      display: block;
+    }
+    .course-tile-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #2a2a2a;
+      padding: 6px 8px;
+      background: #fafafa;
+      line-height: 1.3;
+    }
+
+    /* ── Features ── */
+    .features-wrap { padding: 0 36px; margin-bottom: 8px; }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .feature-icon {
+      width: 32px; height: 32px;
+      background: #0a0a0a;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .feature-icon svg { width: 14px; height: 14px; }
+    .feature-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0a0a0a;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+    .feature-desc {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.5;
+    }
+
+    /* ── Pricing ── */
+    .pricing-wrap { padding: 0 36px; margin-bottom: 28px; }
+    .pricing-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .pricing-box {
+      border: 1.5px solid #e8e8e8;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .pricing-row {
+      display: flex;
+      align-items: stretch;
+    }
+    .pricing-item {
+      flex: 1;
+      padding: 18px 20px;
+    }
+    .pricing-item + .pricing-item {
+      border-left: 1.5px solid #e8e8e8;
+    }
+    .pricing-label {
+      font-size: 10px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .pricing-amount {
+      font-size: 32px;
+      font-weight: 900;
+      color: #0a0a0a;
+      line-height: 1;
+      display: inline;
+    }
+    .pricing-original {
+      font-size: 14px;
+      color: #ccc;
+      text-decoration: line-through;
+      margin-left: 8px;
+      font-weight: 400;
+      vertical-align: middle;
+    }
+    .pricing-highlight {
+      background: #0a0a0a;
+      padding: 18px 20px;
+      min-width: 90px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .pricing-highlight-top {
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 700;
+    }
+    .pricing-highlight-num {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .pricing-best {
+      background: #f5f5f5;
+      padding: 10px 20px;
+      font-size: 12px;
+      color: #555;
+      font-weight: 500;
+      border-top: 1px solid #e8e8e8;
+      text-align: center;
+    }
+    .pricing-best strong { color: #0a0a0a; font-weight: 700; }
+
+    /* ── Final CTA ── */
+    .final-cta { padding: 0 36px 28px; }
+
+    /* ── Signature ── */
+    .signature {
+      padding: 24px 36px 32px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .signature p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.8;
+    }
+    .signature p strong { color: #0a0a0a; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 20px 4px 0;
+      text-align: center;
+    }
+    .footer p {
+      font-size: 11px;
+      color: #b8b8b8;
+      line-height: 1.8;
+    }
+    .footer a { color: #999; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* ── Mobile ── */
+    @media only screen and (max-width: 480px) {
+      .wrapper { padding: 16px 12px 40px; }
+      .dark-header { padding: 24px 24px 20px; }
+      .dark-header h1 { font-size: 26px; }
+      .stats { flex-wrap: wrap; }
+      .stat-item { min-width: 50%; border-bottom: 1px solid rgba(255,255,255,0.07); }
+      .body { padding: 24px 24px 8px; }
+      .early-cta-wrap, .section-label, .course-grid-wrap, .features-wrap, .pricing-wrap, .final-cta { padding-left: 24px; padding-right: 24px; }
+      .divider { margin-left: 24px; margin-right: 24px; }
+      .signature { padding: 20px 24px 24px; }
+      .pricing-row { flex-direction: column; }
+      .pricing-item + .pricing-item { border-left: none; border-top: 1.5px solid #e8e8e8; }
+      .pricing-highlight { flex-direction: row; gap: 6px; min-width: unset; border-top: 1.5px solid #333; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Preview text (invisible — shows in inbox) -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
+  Tamil video lectures, live mentors, quizzes. Everything you need to pass the IITM BS Qualifier in one place. May 2026 term is now open.
+  &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+
+<div class="wrapper">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-img">
+        <img src="https://bsprep.in/new-logo.jpeg" alt="BSPrep" width="36" height="36" style="width:36px;height:36px;object-fit:cover;transform:scale(1.4);" />
+      </div>
+      <div>
+        <div class="topbar-logo-name">BSPrep</div>
+        <div class="topbar-logo-sub">Student-led. Not affiliated with IIT Madras.</div>
+      </div>
+    </div>
+    <a href="https://bsprep.in" class="topbar-link">bsprep.in</a>
+  </div>
+
+  <!-- OG Hero Image -->
+  <div class="hero-img">
+    <a href="https://bsprep.in/courses">
+      <img
+        src="https://bsprep.in/og-image.png"
+        alt="BSPrep — IITM BS Qualifier Prep Platform"
+        width="600"
+      />
+    </a>
+  </div>
+
+  <!-- Main card -->
+  <div class="card">
+
+    <!-- Dark header -->
+    <div class="dark-header">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        May 2026 Term &nbsp;·&nbsp; Enrollments open
+      </div>
+      <h1>Most students fail the<br />Qualifier because they<br />prepare alone.</h1>
+      <p style="margin-top:12px;">
+        You do not have to. BSPrep gives you Tamil video lectures, live mentors who already passed,
+        and a community of students going through the same thing right now.
+      </p>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Students</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Subjects</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Tamil</div>
+        <div class="stat-label">Medium</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Live</div>
+        <div class="stat-label">Mentors</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <p>Hey,</p>
+      <p>
+        The May 2026 Qualifier is a few weeks away. If you are still figuring out where to start,
+        here is the honest truth: the syllabus is straightforward, but the way the questions are asked
+        is not. Students who do well are the ones who have practiced the right material the right way.
+      </p>
+      <p>
+        We are students from IITM BS who built <strong>BSPrep</strong> because we went through this
+        and saw how much better it could be with the right resources. Everything on this platform is
+        built specifically for the Qualifier — nothing generic, nothing recycled.
+      </p>
+    </div>
+
+    <!-- Early CTA for skimmers -->
+    <div class="early-cta-wrap">
+      <a href="https://bsprep.in/courses" class="cta-btn">See the Courses and Enroll</a>
+      <p class="cta-note">Secure payment via Razorpay &nbsp;·&nbsp; Starting at just ₹129</p>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Course grid -->
+    <p class="section-label">4 Courses. All Qualifier subjects.</p>
+    <div class="course-grid-wrap">
+      <div class="course-grid">
+        <div class="course-tile">
+          <img src="https://bsprep.in/courses/math.png" alt="Mathematics for Data Science I" />
+          <div class="course-tile-label">Mathematics for Data Science I</div>
+        </div>
+        <div class="course-tile">
+          <img src="https://bsprep.in/courses/stats.png" alt="Statistics for Data Science I" />
+          <div class="course-tile-label">Statistics for Data Science I</div>
+        </div>
+        <div class="course-tile">
+          <img src="https://bsprep.in/courses/ct.png" alt="Computational Thinking" />
+          <div class="course-tile-label">Computational Thinking</div>
+        </div>
+        <div class="course-tile">
+          <img src="https://bsprep.in/courses/english.png" alt="English I" />
+          <div class="course-tile-label">English I</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Features -->
+    <p class="section-label">What is inside</p>
+    <div class="features-wrap">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="10" rx="2" stroke="white" stroke-width="1.3"/><path d="M5 5l4 2-4 2V5z" fill="white"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Tamil video lectures for every subject</div>
+          <div class="feature-desc">Full video course for Math, Stats, Computational Thinking, and English. Taught in Tamil so you actually understand, not just follow along.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg viewBox="0 0 14 14" fill="none"><circle cx="5" cy="5" r="3" stroke="white" stroke-width="1.3"/><circle cx="10" cy="9" r="2.5" stroke="white" stroke-width="1.3"/><path d="M7.5 6.5L8.5 7.5" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Live sessions with mentors who passed</div>
+          <div class="feature-desc">Bring your doubts. Our mentors have cleared the same Qualifier you are preparing for. They know what the exam actually tests.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M2 4h10M2 7h7M2 10h5" stroke="white" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Practice quizzes and curated notes</div>
+          <div class="feature-desc">Test yourself before the real thing. Notes are written by students for students — not copied from textbooks.</div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="white" stroke-width="1.3"/><path d="M5 6l1.5 1.5L9 5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Online compiler, tools and community</div>
+          <div class="feature-desc">GPA calculator, code compiler, and a community of students in the same batch. Everything in one place.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Pricing -->
+    <p class="section-label">May 2026 pricing</p>
+    <div class="pricing-wrap">
+      <div class="pricing-box">
+        <div class="pricing-row">
+          <div class="pricing-item">
+            <div class="pricing-label">Per course</div>
+            <span class="pricing-amount">₹129</span>
+            <span class="pricing-original">₹149</span>
+          </div>
+          <div class="pricing-item">
+            <div class="pricing-label">All 4 courses</div>
+            <span class="pricing-amount">₹499</span>
+            <span class="pricing-original">₹599</span>
+          </div>
+          <div class="pricing-highlight">
+            <div class="pricing-highlight-top">Save</div>
+            <div class="pricing-highlight-num">17%</div>
+          </div>
+        </div>
+        <div class="pricing-best">
+          Get all 4 courses for <strong>₹499</strong> and save ₹100 compared to buying separately.
+        </div>
+      </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="final-cta">
+      <a href="https://bsprep.in/courses" class="cta-btn">Enroll Now for May 2026</a>
+      <p class="cta-note" style="margin-top:10px;">
+        Questions? Mail us at <a href="mailto:bsprep.team@gmail.com" style="color:#555;text-decoration:underline;">bsprep.team@gmail.com</a>
+      </p>
+    </div>
+
+    <!-- Signature -->
+    <div class="signature">
+      <p>
+        Good luck with the prep. Put in the work, it pays off.<br /><br />
+        <strong>The BSPrep Team</strong><br />
+        <span style="color:#aaa;font-size:12px;">Students helping students. Not affiliated with IIT Madras.</span>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>
+      <a href="https://bsprep.in">bsprep.in</a> &nbsp;·&nbsp;
+      <a href="https://bsprep.in/privacy">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="mailto:bsprep.team@gmail.com?subject=Unsubscribe">Unsubscribe</a>
+      <br />
+      You received this because you signed up or enrolled on BSPrep.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
