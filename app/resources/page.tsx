@@ -7,13 +7,24 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { LoginModal } from "@/components/auth/login-modal"
-import { SignUpModal } from "@/components/auth/signup-modal"
-import { ForgotPasswordModal } from "@/components/auth/forgot-password-modal"
+import dynamic from "next/dynamic"
 import { Loading } from "@/components/loading"
 import { courseData } from "@/lib/gpa/course-data"
 import { createClient } from "@/lib/supabase/client"
 import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, ExternalLink, Loader2, Plus, Star } from "lucide-react"
+
+const LoginModal = dynamic(
+  () => import("@/components/auth/login-modal").then((m) => ({ default: m.LoginModal })),
+  { ssr: false }
+)
+const SignUpModal = dynamic(
+  () => import("@/components/auth/signup-modal").then((m) => ({ default: m.SignUpModal })),
+  { ssr: false }
+)
+const ForgotPasswordModal = dynamic(
+  () => import("@/components/auth/forgot-password-modal").then((m) => ({ default: m.ForgotPasswordModal })),
+  { ssr: false }
+)
 
 type LevelValue = "foundation" | "diploma" | "degree"
 type DegreeValue = "data-science" | "electronic-systems"

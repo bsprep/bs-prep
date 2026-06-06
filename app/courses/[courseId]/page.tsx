@@ -4,7 +4,6 @@ import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
-import { BeamsBackground } from "@/components/beams-background"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,9 +11,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, Award, BookOpen, Calendar, FileText, Video, Search, X } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import { LiveClassCard } from "@/components/live-class-card"
-import { LoginModal } from "@/components/auth/login-modal"
-import { SignUpModal } from "@/components/auth/signup-modal"
+
+const LoginModal = dynamic(
+  () => import("@/components/auth/login-modal").then((m) => ({ default: m.LoginModal })),
+  { ssr: false }
+)
+const SignUpModal = dynamic(
+  () => import("@/components/auth/signup-modal").then((m) => ({ default: m.SignUpModal })),
+  { ssr: false }
+)
 
 interface LiveClass {
   course: string
@@ -245,7 +252,6 @@ export default function CoursePage() {
   if (!course) {
     return (
       <div className="min-h-screen bg-white relative">
-        <BeamsBackground />
         <Navbar isAuthenticated={isAuthenticated} />
         <div className="container mx-auto px-4 pt-32 text-center relative z-10">
           <h1 className="text-2xl font-bold text-black mb-4">Course Not Found</h1>
@@ -267,7 +273,6 @@ export default function CoursePage() {
 
     return (
       <div className="min-h-screen bg-white relative">
-        <BeamsBackground />
         <Navbar isAuthenticated={isAuthenticated} />
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl pt-24 pb-20 relative z-10">
@@ -459,7 +464,6 @@ export default function CoursePage() {
   return (
     <>
     <div className="min-h-screen bg-white relative">
-      <BeamsBackground />
       <Navbar isAuthenticated={isAuthenticated} />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl pt-24 pb-20 relative z-10">

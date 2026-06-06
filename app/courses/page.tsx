@@ -9,8 +9,14 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Lock, Play, Clock, Star, Search, Award, BookOpen, Package, CheckCircle2 } from "lucide-react"
-import { LoginModal } from "@/components/auth/login-modal"
-import { SignUpModal } from "@/components/auth/signup-modal"
+const LoginModal = dynamic(
+  () => import("@/components/auth/login-modal").then((m) => ({ default: m.LoginModal })),
+  { ssr: false }
+)
+const SignUpModal = dynamic(
+  () => import("@/components/auth/signup-modal").then((m) => ({ default: m.SignUpModal })),
+  { ssr: false }
+)
 
 const BeamsBackground = dynamic(() => import("@/components/beams-background").then(mod => ({ default: mod.BeamsBackground })), {
   ssr: false,

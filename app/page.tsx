@@ -13,9 +13,17 @@ import { WelcomeModal } from "@/components/welcome-modal"
 import { QualifierCountdown } from "@/components/qualifier-countdown"
 import { useScrollReveal } from "@/hooks/use-scroll-reveal"
 import { BookOpen, Users, TrendingUp, ArrowRight, ChevronDown, Video, MessageCircle } from "lucide-react"
-import CardSwap, { Card as SwapCard } from "@/components/card-swap"
-
 const spinner = <div className="animate-spin w-6 h-6 border-2 border-gray-200 border-t-black rounded-full" />
+
+const CardSwap = dynamic(
+  () => import("@/components/card-swap"),
+  { ssr: false, loading: () => <div className="h-64 rounded-xl" /> }
+)
+
+const SwapCard = dynamic(
+  () => import("@/components/card-swap").then((m) => ({ default: m.Card })),
+  { ssr: false }
+)
 
 // Lazy load heavy / interaction-only components
 const StaggerTestimonials = dynamic(() => import("@/components/stagger-testimonials").then(mod => ({ default: mod.StaggerTestimonials })), {
