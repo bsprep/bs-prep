@@ -251,7 +251,14 @@ export default function HomePage() {
             </div>
             <div className={`order-1 md:order-2 transition-all duration-700 ease-out delay-150 ${mockup1Ref.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
               <div className="rounded-2xl overflow-hidden border border-[#e5e7eb] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12)]">
-                <img src="/readme/dashboard-preview.png" alt="BSPrep Dashboard" className="w-full h-auto block" />
+                <video
+                  src="/videos/dashboard.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto block"
+                />
               </div>
             </div>
           </div>
@@ -260,7 +267,14 @@ export default function HomePage() {
           <div ref={mockup2Ref.ref} className="grid md:grid-cols-[8fr_5fr] gap-10 md:gap-14 items-center">
             <div className={`transition-all duration-700 ease-out ${mockup2Ref.isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
               <div className="rounded-2xl overflow-hidden border border-[#e5e7eb] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12)]">
-                <img src="/readme/compiler-preview.png" alt="BSPrep Code Compiler" className="w-full h-auto block" />
+                <video
+                  src="/videos/compiler.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto block"
+                />
               </div>
             </div>
             <div className={`space-y-5 transition-all duration-700 ease-out delay-150 ${mockup2Ref.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>

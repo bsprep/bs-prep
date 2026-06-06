@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { BeamsBackgroundLazy } from "@/components/beams-background-lazy"
 import { LoadingProvider } from "@/components/loading-provider"
 import { Loading } from "@/components/loading"
+import { AuthErrorHandler } from "@/components/auth-error-handler"
 import "./globals.css"
 
 const urbanist = Urbanist({ 
@@ -150,7 +151,8 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <BeamsBackgroundLazy />
           <div className="relative z-10">
-            <LoadingProvider>
+            <AuthErrorHandler />
+          <LoadingProvider>
               <Suspense fallback={<Loading />}>
                 {children}
               </Suspense>
