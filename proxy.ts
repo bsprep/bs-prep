@@ -70,13 +70,13 @@ export async function proxy(request: NextRequest) {
   // Apply rate limiting to API routes
   if (pathname.startsWith('/api/')) {
     if (pathname.startsWith('/api/enroll')) {
-      const response = await updateSession(request)
+      const { response } = await updateSession(request)
       return addSecurityHeaders(response, request)
     }
 
     // Admin API routes: skip rate limiting — they're already protected by auth
     if (pathname.startsWith('/api/admin/')) {
-      const response = await updateSession(request)
+      const { response } = await updateSession(request)
       return addSecurityHeaders(response, request)
     }
 
@@ -136,8 +136,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Handle Supabase session and authentication
-  const response = await updateSession(request)
+  // Handle Supabase session and authentication — one network call, reused everywhere
+  const { response, user } = await updateSession(request)
 
   if (pathname.startsWith('/dashboard/admin')) {
     const url = request.nextUrl.clone()
@@ -145,15 +145,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Block unauthenticated access to admin routes.
+  // Block unauthenticated access to admin routes — reuse user from updateSession
   if (pathname.startsWith('/admin') && pathname !== '/admin/signin') {
-    const { createServerClient } = await import('@supabase/ssr')
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => request.cookies.getAll(), setAll: () => {} } }
-    )
-    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/signin'
@@ -161,15 +154,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Block unauthenticated access to mentor routes.
+  // Block unauthenticated access to mentor routes — reuse user from updateSession
   if (pathname.startsWith('/mentor') && pathname !== '/mentor/signin') {
-    const { createServerClient } = await import('@supabase/ssr')
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { cookies: { getAll: () => request.cookies.getAll(), setAll: () => {} } }
-    )
-    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/mentor/signin'
