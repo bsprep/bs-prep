@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { Loader2, ArrowLeft, Video, Search, X } from "lucide-react";
+import { Loader2, ArrowLeft, Video, Search, X, Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 const LiveClassCard = dynamic(
   () => import("@/components/live-class-card").then(mod => ({ default: mod.LiveClassCard })),
@@ -53,8 +54,16 @@ export default function LiveClassesPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    };
+    fetchUser();
+    
     const fetchClasses = async () => {
       try {
         setLoading(true);
@@ -73,6 +82,16 @@ export default function LiveClassesPage() {
     const interval = setInterval(fetchClasses, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleAddToCalendar = () => {
+    if (confirm("This will subscribe your calendar to all live classes. Click OK to continue.")) {
+      const host = window.location.host;
+      const protocol = window.location.protocol === 'https:' ? 'webcal://' : 'http://'; 
+      // some devices handle http:// better for local testing, but webcal:// is standard for production
+      const url = `${protocol}${host}/api/calendar/feed${userId ? `?userId=${userId}` : ''}`;
+      window.open(url, '_blank');
+    }
+  };
 
   // Unique course codes present in data
   const availableCourses = useMemo(() => {
@@ -120,7 +139,7 @@ export default function LiveClassesPage() {
       </Link>
 
       {/* Page Header */}
-      <div className="bg-white border border-gray-200 rounded-xl px-7 py-6 flex items-center justify-between shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-xl px-7 py-6 flex items-center justify-between shadow-sm flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center shrink-0">
             <Video className="w-5 h-5 text-white" />
@@ -132,9 +151,18 @@ export default function LiveClassesPage() {
             </p>
           </div>
         </div>
-        <div className="text-right hidden sm:block">
-          <p className="text-2xl font-bold text-black">{classes.length}</p>
-          <p className="text-xs text-gray-500 font-medium">Total Classes</p>
+        <div className="flex items-center gap-6">
+          <button
+            onClick={handleAddToCalendar}
+            className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-900 transition-colors"
+          >
+            <CalendarIcon className="w-4 h-4" />
+            Add to Calendar
+          </button>
+          <div className="text-right hidden sm:block">
+            <p className="text-2xl font-bold text-black">{classes.length}</p>
+            <p className="text-xs text-gray-500 font-medium">Total Classes</p>
+          </div>
         </div>
       </div>
 
