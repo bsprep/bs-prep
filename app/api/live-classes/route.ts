@@ -9,17 +9,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
   try {
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
-
-    if (!sheetId || !apiKey) {
-      return NextResponse.json(
-        { error: "Google Sheets credentials not configured" },
-        { status: 500 }
-      );
-    }
-
-    // Get user's enrolled courses
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -35,49 +24,44 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fetch data from Google Sheets API
-    // Range assumes columns: Course | Topic | Meeting Link | Time | Date | YouTube Link
-    const range = "Sheet1!A2:F1000"; // Adjust sheet name and range as needed
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+    // Fetch classes from Supabase instead of Google Sheets
+    const { data: dbClasses, error } = await supabase
+      .from('live_classes')
+      .select('*')
+      .order('date', { ascending: true });
 
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`Google Sheets API error: ${response.statusText}`);
+    if (error) {
+      throw error;
     }
 
-    const data = await response.json();
-    const rows = data.values || [];
+    const rows = dbClasses || [];
 
-    // Transform rows into structured data
-    const classes = rows
-      .filter((row: string[]) => row.length >= 5) // Ensure row has all required fields
-      .map((row: string[]) => ({
-        course: row[0] || "", // Changed from subject to course
-        topic: row[1] || "",
-        meetingLink: row[2] || "",
-        time: row[3] || "",
-        date: row[4] || "",
-        youtubeLink: row[5] || "", // Add youtube link from column F
-      }))
-      .filter((cls: { course: string; topic: string }) => cls.course && cls.topic) // Filter out empty rows
-      .filter((cls: { course: string }) => {
-        // Keep Python and Doubts classes visible for everyone in dashboard.
-        const code = cls.course.toLowerCase();
-        if (code === 'python' || code === 'doubts') {
-          return true;
-        }
+    // Filter classes based on enrollment
+    const classes = rows.map(row => ({
+      id: row.id,
+      course: row.course,
+      topic: row.topic,
+      meetingLink: row.meeting_link,
+      time: row.time,
+      date: row.date,
+      youtubeLink: row.youtube_link || "",
+    })).filter((cls) => {
+      // Keep Python and Doubts classes visible for everyone in dashboard.
+      const code = cls.course.toLowerCase();
+      if (code === 'python' || code === 'doubts') {
+        return true;
+      }
 
-        // Match sheet code -> course ID for enrollment filtering.
-        const courseIdMap: { [key: string]: string } = {
-          'ct': 'qualifier-computational-thinking',
-          'stats-1': 'qualifier-stats-1',
-          'math-1': 'qualifier-math-1',
-          'python': 'foundation-programming-python'
-        };
-        const courseId = courseIdMap[code];
-        return courseId ? enrolledCourseIds.includes(courseId) : false;
-      });
+      // Match course code -> course ID for enrollment filtering.
+      const courseIdMap: { [key: string]: string } = {
+        'ct': 'qualifier-computational-thinking',
+        'stats-1': 'qualifier-stats-1',
+        'math-1': 'qualifier-math-1',
+        'python': 'foundation-programming-python'
+      };
+      const courseId = courseIdMap[code];
+      return courseId ? enrolledCourseIds.includes(courseId) : false;
+    });
 
     return NextResponse.json({ classes });
   } catch (error) {
