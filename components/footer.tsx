@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
 import { useState } from "react"
@@ -74,9 +74,10 @@ export function Footer() {
     {
       heading: "Company",
       links: [
-        { name: "Careers", href: "/careers" },
-        { name: "Support", href: "/support" },
-        { name: "Donate", href: "/donate" },
+        { name: "Careers", href: "https://docs.google.com/forms/d/e/1FAIpQLSfvet6P3yTtm4Ui3VE7M0gDSAsltxZ-Rrtd4fgUY0_iL7lkNg/viewform", external: true },
+        { name: "Feedback", href: "https://docs.google.com/forms/d/e/1FAIpQLSeqAmEuz6NrH6P-sa7jD9-0272a-cwm9eASrbvHor7nJN_TtQ/viewform?usp=dialog", external: true },
+        { name: "Contact", href: "https://docs.google.com/forms/d/e/1FAIpQLSc8lSGsbLay_yvhHWjL2rtCd0YJCgjXmxNZ3ttB4IcFB0Js8g/viewform?usp=dialog", external: true },
+        { name: "Donate", href: "https://rzp.io/rzp/support-bsprep", external: true },
         { name: "Announcements", href: "/announcements" },
       ],
     },
@@ -106,6 +107,7 @@ export function Footer() {
               </div>
               <p className="text-slate-600 text-sm leading-relaxed">Learn. Grow. Excel. Together.</p>
               <p className="text-slate-500 text-xs">Community-driven academic support for IIT Madras students.</p>
+              <a href="mailto:support@bsprep.in" className="text-slate-500 text-xs hover:text-black transition-colors inline-block mt-1">support@bsprep.in</a>
               <div className="flex gap-3 pt-2">
                 <a
                   href="https://www.linkedin.com/company/bs-prep/"
@@ -124,13 +126,15 @@ export function Footer() {
                   <Youtube className="w-4 h-4" />
                 </a>
               </div>
-              <Link
-                href="/donate"
+              <a
+                href="https://rzp.io/rzp/support-bsprep"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
               >
                 <HeartHandshake className="h-3.5 w-3.5" />
                 Support BSPrep
-              </Link>
+              </a>
             </div>
 
             {/* Link columns */}

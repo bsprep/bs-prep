@@ -276,12 +276,9 @@ export function Navbar({ isAuthenticated = false, userRole = "student" }: Navbar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link href="/support" className="text-base font-medium text-slate-700 hover:text-black transition-colors">
-                Support
-              </Link>
-              <Link href="/careers" className="text-base font-medium text-slate-700 hover:text-black transition-colors">
+              <a href="https://docs.google.com/forms/d/e/1FAIpQLSfvet6P3yTtm4Ui3VE7M0gDSAsltxZ-Rrtd4fgUY0_iL7lkNg/viewform" target="_blank" rel="noopener noreferrer" className="text-base font-medium text-slate-700 hover:text-black transition-colors">
                 Careers
-              </Link>
+              </a>
             </div>
           )}
 
@@ -328,9 +325,6 @@ export function Navbar({ isAuthenticated = false, userRole = "student" }: Navbar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Link href="/support" className="text-base font-medium text-slate-700 hover:text-black transition-colors">
-                Support
-              </Link>
             </div>
           )}
 
@@ -560,18 +554,14 @@ export function Navbar({ isAuthenticated = false, userRole = "student" }: Navbar
                 >
                   GPA Predictor
                 </Link>
-                <Link
-                  href="/support"
-                  className="block px-4 py-2 text-sm font-medium text-slate-700 hover:text-black hover:bg-slate-50 rounded-lg transition-all"
-                >
-                  Support
-                </Link>
-                <Link
-                  href="/careers"
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfvet6P3yTtm4Ui3VE7M0gDSAsltxZ-Rrtd4fgUY0_iL7lkNg/viewform"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block px-4 py-2 text-sm font-medium text-slate-700 hover:text-black hover:bg-slate-50 rounded-lg transition-all"
                 >
                   Careers
-                </Link>
+                </a>
               </>
             )}
 
@@ -604,9 +594,14 @@ export function Navbar({ isAuthenticated = false, userRole = "student" }: Navbar
                 <Link href="/tools/gpa-predictor" className="block px-6 py-2 text-sm text-slate-700 hover:text-black hover:bg-slate-50 rounded-lg transition-all">
                   GPA Predictor
                 </Link>
-                <Link href="/support" className="block px-4 py-2 text-sm font-medium text-slate-700 hover:text-black hover:bg-slate-50 rounded-lg transition-all">
-                  Support
-                </Link>
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfvet6P3yTtm4Ui3VE7M0gDSAsltxZ-Rrtd4fgUY0_iL7lkNg/viewform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block px-4 py-2 text-sm font-medium text-slate-700 hover:text-black hover:bg-slate-50 rounded-lg transition-all"
+                >
+                  Careers
+                </a>
               </>
             )}
           </div>
