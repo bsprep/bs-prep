@@ -70,87 +70,72 @@ export function LiveClassCard({
   const status = getStatus();
 
   const statusBadge = {
-    live: "bg-red-500/10 text-red-600 border border-red-200",
-    upcoming: "bg-blue-500/10 text-blue-700 border border-blue-200",
-    completed: "bg-gray-100 text-gray-500 border border-gray-200",
+    live: "bg-red-50 text-red-600 border border-red-200",
+    upcoming: "bg-blue-50 text-blue-700 border border-blue-200",
+    completed: "bg-black/5 text-black border border-black/10",
   };
 
   const statusLabel = {
-    live: "● Live",
-    upcoming: "Upcoming",
-    completed: "Completed",
+    live: "LIVE",
+    upcoming: "UPCOMING",
+    completed: "COMPLETED",
   };
 
   return (
-    <Card className="bg-white border border-gray-200 hover:border-black transition-all duration-200 hover:shadow-lg rounded-xl overflow-hidden">
-      <CardContent className="p-0">
-        {/* Header */}
-        <div className="px-5 pt-5 pb-3 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <Badge className={`text-xs font-semibold px-2 py-0.5 ${statusBadge[status]}`}>
-              {status === "live" && <Video className="w-3 h-3 mr-1" />}
-              {statusLabel[status]}
-            </Badge>
-            <Calendar className="w-4 h-4 text-gray-400" />
+    <div className="bg-white border border-black/10 hover:border-black hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden flex flex-col group group/card h-full">
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="flex items-center justify-between mb-6">
+          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 ${statusBadge[status]}`}>
+            {status === "live" && <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>}
+            {statusLabel[status]}
+          </span>
+          <Calendar className="w-4 h-4 text-black/30" />
+        </div>
+        
+        <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-2">{getCourseDisplayName(course)}</p>
+        <h3 className="font-black text-black uppercase tracking-tight text-xl leading-[1.2] mb-6 flex-1">
+          {topic}
+        </h3>
+        
+        <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-black/60 pt-6 border-t border-black/5">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-black/40" />
+            <span>{formatDate(date)}</span>
           </div>
-
-          {/* Course */}
-          <div className="mb-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Course</p>
-            <h3 className="font-bold text-black text-base leading-snug line-clamp-2">
-              {getCourseDisplayName(course)}
-            </h3>
-          </div>
-
-          {/* Topic */}
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Topic</p>
-            <p className="text-sm text-gray-700 leading-snug line-clamp-2 font-medium">
-              {topic}
-            </p>
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-black/40" />
+            <span>{formatTime12hr(time)}</span>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="px-5 py-3">
-          <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-gray-500" />
-              <span className="font-medium">{formatDate(date)}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-gray-500" />
-              <span className="font-medium">{formatTime12hr(time)}</span>
-            </div>
-          </div>
-
-          {status === "completed" ? (
-            youtubeLink ? (
-              <Button
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold text-sm"
-                onClick={() => window.open(youtubeLink, "_blank")}
-              >
-                <Youtube className="w-4 h-4 mr-2" />
-                Watch Recording
-              </Button>
-            ) : (
-              <Button className="w-full bg-gray-100 text-gray-400 font-semibold text-sm cursor-not-allowed" disabled>
-                <Video className="w-4 h-4 mr-2" />
-                No Recording Available
-              </Button>
-            )
-          ) : (
-            <Button
-              className="w-full bg-black hover:bg-black/80 text-white font-semibold text-sm"
-              onClick={() => window.open(meetingLink, "_blank")}
-              disabled={!meetingLink}
+      </div>
+      
+      <div className="p-4 bg-black/5 group-hover/card:bg-black transition-colors">
+        {status === "completed" ? (
+          youtubeLink ? (
+            <button
+              onClick={() => window.open(youtubeLink, "_blank")}
+              className="w-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-red-600 group-hover/card:text-red-400 py-3 transition-colors"
             >
-              <Video className="w-4 h-4 mr-2" />
-              {status === "live" ? "Join Now" : "Join Meeting"}
-            </Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              <Youtube className="w-4 h-4" />
+              WATCH RECORDING
+            </button>
+          ) : (
+            <button disabled className="w-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-black/30 py-3 cursor-not-allowed">
+              <Video className="w-4 h-4" />
+              NO RECORDING
+            </button>
+          )
+        ) : (
+          <button
+            onClick={() => window.open(meetingLink, "_blank")}
+            disabled={!meetingLink}
+            className="w-full flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-black group-hover/card:text-white py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Video className="w-4 h-4" />
+            {status === "live" ? "JOIN NOW" : "JOIN MEETING"}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }

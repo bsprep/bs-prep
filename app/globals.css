@@ -319,3 +319,88 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari and Opera */
 }
+
+/* Driver.js Premium Theme */
+.driverjs-theme-premium.driver-popover {
+  background-color: #0a192f !important;
+  color: white !important;
+  border-radius: 24px !important;
+  padding: 28px !important;
+  border: 2px solid rgba(255,255,255,0.1) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
+  max-width: 420px !important;
+  font-family: var(--font-sora), 'Sora', system-ui, sans-serif !important;
+}
+
+.driverjs-theme-premium .driver-popover-title {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  margin-bottom: 10px !important;
+  color: white !important;
+  font-family: var(--font-sora), 'Sora', system-ui, sans-serif !important;
+}
+
+.driverjs-theme-premium .driver-popover-close-btn {
+  color: rgba(255,255,255,0.4) !important;
+  font-size: 20px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.driverjs-theme-premium .driver-popover-description {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  line-height: 1.7 !important;
+  font-family: var(--font-sora), 'Sora', system-ui, sans-serif !important;
+}
+
+.driverjs-theme-premium .driver-popover-footer {
+  margin-top: 24px !important;
+}
+
+.driverjs-theme-premium .driver-popover-footer-btn {
+  background-color: white !important;
+  color: #0a192f !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  font-weight: 900 !important;
+  font-size: 11px !important;
+  border-radius: 9999px !important;
+  padding: 10px 22px !important;
+  border: none !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--font-sora), 'Sora', system-ui, sans-serif !important;
+  cursor: pointer !important;
+}
+
+.driverjs-theme-premium .driver-popover-prev-btn {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255,255,255,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+}
+
+.driverjs-theme-premium .driver-popover-footer-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+  opacity: 0.92 !important;
+}
+
+.driverjs-theme-premium .driver-popover-navigation-btns {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.driverjs-theme-premium .driver-popover-progress-text {
+  color: rgba(255,255,255,0.4) !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  font-family: var(--font-sora), 'Sora', system-ui, sans-serif !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+/* Force hot reload */

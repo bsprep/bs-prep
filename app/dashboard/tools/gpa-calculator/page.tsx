@@ -131,7 +131,7 @@ export default function DashboardGPACalculatorPage() {
     <div className="min-h-screen bg-white relative">
       <BeamsBackground />
             
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div id="tour-gpa-calc-page" className="container mx-auto px-4 py-8 relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl border border-black/10 bg-black mb-6 shadow-md">
             <Calculator className="w-10 h-10 text-white" />
@@ -146,7 +146,7 @@ export default function DashboardGPACalculatorPage() {
 
         {/* Tabs */}
         <div className="flex justify-center mb-10">
-          <div className="bg-white rounded-2xl border border-black/10 p-1 inline-flex gap-1 shadow-md">
+          <div id="tour-gpa-calc" className="bg-white rounded-2xl border border-black/10 p-1 inline-flex gap-1 shadow-md">
             <button
               onClick={() => setActiveTab("course")}
               className={`px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all ${

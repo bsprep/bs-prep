@@ -149,7 +149,7 @@ export default function GPACalculator() {
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-center mb-10">
+        <div id="tour-gpa-calc" className="flex justify-center mb-10">
           <div className="bg-white rounded-2xl border border-black/10 p-1 inline-flex gap-1 shadow-md">
             <button
               onClick={() => setActiveTab("course")}

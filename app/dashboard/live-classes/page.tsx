@@ -121,47 +121,47 @@ export default function LiveClassesPage() {
   const hasActiveFilters = search.trim() || selectedCourses.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div id="tour-live-classes-page" className="space-y-6">
       {/* Back Button */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 text-gray-500 hover:text-black transition-colors text-sm font-medium"
+        className="inline-flex items-center gap-2 text-black/50 hover:text-black transition-colors text-xs font-black uppercase tracking-widest"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Dashboard
       </Link>
 
       {/* Page Header */}
-      <div className="bg-white border border-gray-200 rounded-xl px-7 py-6 flex items-center justify-between shadow-sm flex-wrap gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center shrink-0">
-            <Video className="w-5 h-5 text-white" />
+      <div id="tour-live-classes" className="bg-[#0a192f] rounded-3xl px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between shadow-xl gap-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50 pointer-events-none"></div>
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center shrink-0 border-2 border-white/20">
+            <Video className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-black leading-tight">Live Classes</h1>
-            <p className="text-gray-500 text-sm mt-0.5">
-              Join upcoming lectures and watch recordings of past classes.
+            <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight leading-none mb-2">LIVE CLASSES</h1>
+            <p className="text-white/70 text-xs font-bold uppercase tracking-widest">
+              JOIN UPCOMING LECTURES AND WATCH RECORDINGS OF PAST CLASSES.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-6">
-
-          <div className="text-right hidden sm:block">
-            <p className="text-2xl font-bold text-black">{classes.length}</p>
-            <p className="text-xs text-gray-500 font-medium">Total Classes</p>
+        <div className="flex items-center gap-6 relative z-10">
+          <div className="text-right hidden sm:block bg-white/10 px-6 py-4 rounded-2xl border border-white/20">
+            <p className="text-3xl font-black text-white leading-none mb-1">{classes.length}</p>
+            <p className="text-[10px] text-white/70 font-black uppercase tracking-widest">TOTAL CLASSES</p>
           </div>
         </div>
       </div>
 
       {/* Search bar */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      <div className="relative group">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-black/40 group-focus-within:text-black pointer-events-none transition-colors" />
         <input
           type="text"
-          placeholder="Search by topic…"
+          placeholder="SEARCH BY TOPIC…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-10 py-3 rounded-xl border border-gray-200 bg-white text-black text-sm focus:outline-none focus:border-black transition-colors"
+          className="w-full pl-14 pr-12 py-5 rounded-full border-2 border-black/10 bg-white text-black text-sm font-bold uppercase tracking-widest focus:outline-none focus:border-black transition-all hover:shadow-md"
           suppressHydrationWarning
         />
         {search && (
@@ -176,21 +176,21 @@ export default function LiveClassesPage() {
 
       <div className="flex gap-6 items-start">
         {/* Sidebar filter */}
-        <aside className="hidden lg:block w-52 shrink-0 bg-white border border-gray-200 rounded-xl p-4 space-y-4 sticky top-24">
+        <aside className="hidden lg:block w-64 shrink-0 bg-white border border-black/10 rounded-3xl p-6 space-y-8 sticky top-24">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Status</p>
-            <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-4">STATUS</p>
+            <div className="space-y-1.5">
               {tabs.map(tab => (
                 <button
                   key={tab.key}
                   onClick={() => setFilter(tab.key)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filter === tab.key ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50 hover:text-black"
+                  className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                    filter === tab.key ? "bg-black text-white shadow-md" : "text-black/60 hover:bg-black/5 hover:text-black"
                   }`}
                 >
                   {tab.label}
                   {tab.key !== "all" && (
-                    <span className={`ml-1.5 text-xs ${filter === tab.key ? "text-white/60" : "text-gray-400"}`}>
+                    <span className={`ml-2 text-[10px] px-2 py-0.5 rounded-full ${filter === tab.key ? "bg-white/20 text-white" : "bg-black/5 text-black/60"}`}>
                       {classes.filter(c => {
                         const s = getStatus(c.date, c.time);
                         return tab.key === "upcoming" ? s === "upcoming" || s === "live" : s === "completed";
@@ -204,8 +204,8 @@ export default function LiveClassesPage() {
 
           {availableCourses.length > 0 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Course</p>
-              <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-black/40 mb-4">COURSE</p>
+              <div className="space-y-1.5">
                 {availableCourses.map(code => {
                   const label = COURSE_LABELS[code] ?? code;
                   const active = selectedCourses.includes(code);
@@ -213,12 +213,12 @@ export default function LiveClassesPage() {
                     <button
                       key={code}
                       onClick={() => toggleCourse(code)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                        active ? "bg-black text-white" : "text-gray-600 hover:bg-gray-50 hover:text-black"
+                      className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-3 ${
+                        active ? "bg-black text-white shadow-md" : "text-black/60 hover:bg-black/5 hover:text-black"
                       }`}
                     >
-                      <span className={`w-3 h-3 rounded-sm border-2 flex-shrink-0 ${active ? "bg-white border-white" : "border-gray-300"}`} />
-                      {label}
+                      <span className={`w-4 h-4 rounded-sm border-2 flex-shrink-0 transition-colors ${active ? "bg-white border-white" : "border-black/20"}`} />
+                      <span className="line-clamp-1">{label}</span>
                     </button>
                   );
                 })}
@@ -229,9 +229,10 @@ export default function LiveClassesPage() {
           {hasActiveFilters && (
             <button
               onClick={() => { setSearch(""); setSelectedCourses([]); setFilter("all"); }}
-              className="w-full text-xs text-red-500 hover:text-red-700 font-semibold py-1 transition-colors"
+              className="w-full text-[10px] text-red-500 hover:text-red-700 font-black uppercase tracking-widest py-2 transition-colors flex justify-center items-center gap-1 bg-red-50 hover:bg-red-100 rounded-xl"
             >
-              Clear all filters
+              <X className="w-3 h-3" />
+              CLEAR FILTERS
             </button>
           )}
         </aside>
@@ -244,15 +245,15 @@ export default function LiveClassesPage() {
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all border ${
+                className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all border-2 ${
                   filter === tab.key
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-black hover:text-black"
+                    ? "bg-black text-white border-black shadow-md"
+                    : "bg-white text-black/60 border-black/10 hover:border-black hover:text-black"
                 }`}
               >
                 {tab.label}
                 {tab.key !== "all" && (
-                  <span className={`ml-1.5 text-xs ${filter === tab.key ? "text-white/70" : "text-gray-400"}`}>
+                  <span className={`ml-1.5 text-[10px] ${filter === tab.key ? "text-white/70" : "text-black/40"}`}>
                     {classes.filter((c) => {
                       const s = getStatus(c.date, c.time);
                       return tab.key === "upcoming" ? s === "upcoming" || s === "live" : s === "completed";
@@ -265,36 +266,37 @@ export default function LiveClassesPage() {
 
           {/* Results count */}
           {!loading && !error && (
-            <p className="text-xs text-gray-400 font-medium">
-              {filtered.length} {filtered.length === 1 ? "class" : "classes"} found
+            <p className="text-[10px] text-black/40 font-black uppercase tracking-widest">
+              {filtered.length} {filtered.length === 1 ? "CLASS" : "CLASSES"} FOUND
               {hasActiveFilters && " · "}
               {hasActiveFilters && (
                 <button
                   onClick={() => { setSearch(""); setSelectedCourses([]); setFilter("all"); }}
                   className="text-red-500 hover:text-red-700 underline underline-offset-2"
                 >
-                  clear filters
+                  CLEAR FILTERS
                 </button>
               )}
             </p>
           )}
 
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-black" />
+            <div className="flex items-center justify-center py-24">
+              <Loader2 className="h-10 w-10 animate-spin text-black" />
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+            <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6 text-red-700 text-sm font-bold uppercase tracking-widest text-center">
               {error}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-10 text-center">
-              <p className="text-gray-600 font-medium">No classes match your filters.</p>
+            <div className="bg-black/5 border-2 border-black/10 rounded-3xl p-16 text-center flex flex-col items-center justify-center">
+              <Search className="w-12 h-12 text-black/20 mb-4" />
+              <p className="text-black/60 font-black uppercase tracking-widest">NO CLASSES MATCH YOUR FILTERS.</p>
               <button
                 onClick={() => { setSearch(""); setSelectedCourses([]); setFilter("all"); }}
-                className="mt-2 text-sm text-black underline underline-offset-2 hover:no-underline"
+                className="mt-6 text-xs text-white bg-black hover:bg-black/80 px-6 py-3 rounded-full font-black uppercase tracking-widest transition-colors shadow-md"
               >
-                Clear all filters
+                CLEAR ALL FILTERS
               </button>
             </div>
           ) : (

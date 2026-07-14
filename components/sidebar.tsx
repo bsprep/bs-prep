@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/lib/supabase/client"
-import { Bell, User, Menu, X, ChevronDown, Settings, LogOut, LayoutDashboard, BookOpen, PenTool, Code, Library, MessageCircleQuestion, Calculator, LineChart } from "lucide-react"
+import { Bell, User, Menu, X, ChevronDown, Settings, LogOut, LayoutDashboard, BookOpen, PenTool, Code, Library, MessageCircleQuestion, Calculator, LineChart, Video } from "lucide-react"
 
 const LoginModal = dynamic(
   () => import("@/components/auth/login-modal").then((m) => ({ default: m.LoginModal })),
@@ -35,6 +35,7 @@ const SIDEBAR_LINKS = [
   { name: "COMPILER", href: "/compiler", icon: Code },
   { name: "RESOURCES", href: "/dashboard/resources", icon: Library },
   { name: "DOUBTS", href: "/dashboard/doubts", icon: MessageCircleQuestion },
+  { name: "LIVE CLASSES", href: "/dashboard/live-classes", icon: Video },
 ]
 
 const TOOLS_LINKS = [
@@ -99,10 +100,12 @@ export function Sidebar({ isAuthenticated = false, userRole = "student" }: { isA
 
     const fetchNotifications = async () => {
       try {
+        if (!user || !user.id) return;
+        
         const { data: enrollments, error: enrollError } = await supabase
           .from('enrollments')
           .select('course_id')
-          .eq('user_id', user?.id)
+          .eq('user_id', user.id)
 
         if (enrollError) throw enrollError
 
@@ -146,7 +149,7 @@ export function Sidebar({ isAuthenticated = false, userRole = "student" }: { isA
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
+    router.push('/?login=true')
     router.refresh()
   }
 
@@ -175,6 +178,7 @@ export function Sidebar({ isAuthenticated = false, userRole = "student" }: { isA
             return (
               <Link
                 key={link.name}
+                id={link.name === "COURSES" ? "tour-sidebar-courses" : link.name === "QUIZ PREP" ? "tour-sidebar-quizprep" : link.name === "DOUBTS" ? "tour-sidebar-doubts" : undefined}
                 href={link.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors ${
                   isActive
@@ -200,6 +204,7 @@ export function Sidebar({ isAuthenticated = false, userRole = "student" }: { isA
               return (
                 <Link
                   key={link.name}
+                  id={link.name === "COURSES" ? "tour-sidebar-courses" : undefined}
                   href={link.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors ${
                     isActive
@@ -234,6 +239,7 @@ export function Sidebar({ isAuthenticated = false, userRole = "student" }: { isA
               )}
             </Link>
             <Link
+              id="tour-sidebar-settings"
               href="/dashboard/settings"
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors text-black/60 hover:text-black hover:bg-black/5"
             >

@@ -126,7 +126,7 @@ export default function GPAPredictor() {
           </p>
         </div>
 
-        <Card className="bg-white border border-black/10 shadow-xl max-w-5xl mx-auto rounded-2xl">
+        <Card id="tour-gpa-predictor" className="bg-white border border-black/10 shadow-xl max-w-5xl mx-auto rounded-2xl">
           <CardHeader className="border-b-2 border-black pb-6 pt-8">
             <CardTitle className="text-3xl font-black text-black uppercase tracking-tight">PREDICT YOUR REQUIRED SCORES</CardTitle>
             <p className="text-black/70 font-bold text-xs uppercase mt-2">Find out what you need in your final exam to achieve your target grade</p>

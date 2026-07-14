@@ -109,7 +109,7 @@ export default function DashboardGPAPredictorPage() {
     <div className="min-h-screen bg-white relative">
       <BeamsBackground />
             
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div id="tour-gpa-predictor-page" className="container mx-auto px-4 py-8 relative z-10">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl border border-black/10 bg-black mb-6 shadow-md">
             <TrendingUp className="w-10 h-10 text-white" />
@@ -122,7 +122,7 @@ export default function DashboardGPAPredictorPage() {
           </p>
         </div>
 
-        <Card className="bg-white border border-black/10 shadow-xl max-w-5xl mx-auto rounded-2xl">
+        <Card id="tour-gpa-predictor" className="bg-white border border-black/10 shadow-xl max-w-5xl mx-auto rounded-2xl">
           <CardHeader className="border-b-2 border-black pb-6 pt-8">
             <CardTitle className="text-3xl font-black text-black uppercase tracking-tight">PREDICT YOUR REQUIRED SCORES</CardTitle>
             <p className="text-black/70 font-bold text-xs uppercase mt-2">Find out what you need in your final exam to achieve your target grade</p>

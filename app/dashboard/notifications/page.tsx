@@ -79,7 +79,7 @@ export default function DashboardNotificationsPage() {
   const hasNoNotifications = upcomingClasses.length === 0 && announcements.length === 0 && doubtNotifications.length === 0
 
   return (
-    <div className="flex-1 p-6 md:p-10 lg:p-12 max-w-4xl mx-auto w-full">
+    <div id="tour-notifications" className="flex-1 p-6 md:p-10 lg:p-12 max-w-4xl mx-auto w-full">
       <div className="flex items-center gap-4 mb-8 pb-6 border-b-2 border-black/10">
         <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-2xl shadow-md">
           <Bell className="w-6 h-6" />

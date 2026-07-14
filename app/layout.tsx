@@ -10,6 +10,7 @@ import { LoadingProvider } from "@/components/loading-provider"
 import { Loading } from "@/components/loading"
 import { AuthErrorHandler } from "@/components/auth-error-handler"
 import { ReferralTracker } from "@/components/referral-tracker"
+import { TourProvider } from "@/components/tour-provider"
 import "./globals.css"
 
 const sora = Sora({ 
@@ -154,11 +155,11 @@ export default function RootLayout({
           <BeamsBackgroundLazy />
           <div className="relative z-10">
             <AuthErrorHandler />
-          <LoadingProvider>
+            <TourProvider />
+            <LoadingProvider>
               <Suspense fallback={<Loading />}>
                 {children}
               </Suspense>
-
             </LoadingProvider>
           </div>
         </ThemeProvider>

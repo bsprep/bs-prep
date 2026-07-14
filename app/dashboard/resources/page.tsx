@@ -458,7 +458,7 @@ export default function DashboardResourcesPage() {
     <div className="flex-1 flex flex-col">
             <main className="flex-1 px-4 py-10">
         <div className="mx-auto w-full max-w-7xl space-y-6">
-          <div className="border border-black/10 bg-white p-6 md:p-10 shadow-xl rounded-2xl">
+          <div id="tour-resources" className="border border-black/10 bg-white p-6 md:p-10 shadow-xl rounded-2xl">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl font-black text-black uppercase tracking-tight leading-none">RESOURCES NOTES</h1>

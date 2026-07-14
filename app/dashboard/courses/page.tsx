@@ -58,7 +58,7 @@ export default function DashboardCoursesPage() {
   })
 
   return (
-    <div className="bg-transparent">
+    <div id="tour-courses-page" className="bg-transparent">
       {/* Page header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div>
@@ -192,7 +192,7 @@ export default function DashboardCoursesPage() {
             <p className="text-black/60 font-bold uppercase tracking-widest">No courses found.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div id="tour-courses-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCourses.map(course => {
               const isEnrolled = enrolledCourseIds.includes(course.id)
               

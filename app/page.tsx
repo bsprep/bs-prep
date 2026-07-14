@@ -1,7 +1,7 @@
 "use client"
 
 import Script from "next/script"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
@@ -33,6 +33,18 @@ const SignUpModal = dynamic(() => import("@/components/auth/signup-modal").then(
 export default function HomePage() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("login") === "true") {
+        setShowLogin(true);
+        // Clean up the URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-white text-black">
