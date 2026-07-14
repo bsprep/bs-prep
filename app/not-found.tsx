@@ -17,9 +17,10 @@ export default function NotFound() {
       <main className="flex-1 flex items-center justify-center px-4 py-20 relative z-10">
         <div className="max-w-lg w-full text-center">
 
-          {/* 404 number */}
-          <h1 className="text-8xl sm:text-9xl font-bold text-black tracking-tight mb-2">404</h1>
-          <p className="text-xs uppercase tracking-widest text-black/30 font-medium mb-8">Page not found</p>
+          {/* 404 Illustration */}
+          <div className="flex justify-center mb-8">
+            <img src="/404.svg" alt="404 Not Found" className="w-full max-w-[320px] h-auto object-contain" />
+          </div>
 
           {/* Message card */}
           <div className="bg-white border border-black/10 rounded-2xl shadow-sm px-8 py-8 mb-8">
