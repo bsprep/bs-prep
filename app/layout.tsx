@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Suspense } from "react"
 import Script from "next/script"
-import { Urbanist } from "next/font/google"
+import { Sora } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { BeamsBackgroundLazy } from "@/components/beams-background-lazy"
@@ -10,11 +10,12 @@ import { LoadingProvider } from "@/components/loading-provider"
 import { Loading } from "@/components/loading"
 import { AuthErrorHandler } from "@/components/auth-error-handler"
 import { ReferralTracker } from "@/components/referral-tracker"
+import { TourProvider } from "@/components/tour-provider"
 import "./globals.css"
 
-const urbanist = Urbanist({ 
+const sora = Sora({ 
   subsets: ["latin"],
-  variable: "--font-urbanist",
+  variable: "--font-sora",
   display: "swap",
 })
 
@@ -99,7 +100,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={urbanist.variable} suppressHydrationWarning>
+    <html lang="en" className={sora.variable} suppressHydrationWarning>
       <head>
         {/* Google tag (gtag.js) */}
         <Script
@@ -148,17 +149,17 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className={`font-sans antialiased ${urbanist.className}`}>
+      <body className={`font-sans antialiased ${sora.className}`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <ReferralTracker />
           <BeamsBackgroundLazy />
           <div className="relative z-10">
             <AuthErrorHandler />
-          <LoadingProvider>
+            <TourProvider />
+            <LoadingProvider>
               <Suspense fallback={<Loading />}>
                 {children}
               </Suspense>
-
             </LoadingProvider>
           </div>
         </ThemeProvider>

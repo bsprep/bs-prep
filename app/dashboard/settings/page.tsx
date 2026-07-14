@@ -151,16 +151,16 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 py-4">
-      <h1 className="text-3xl font-bold text-black">Settings</h1>
+    <div id="tour-settings" className="max-w-2xl mx-auto space-y-8 py-8">
+      <h1 className="text-3xl md:text-5xl font-black text-black uppercase tracking-tight">SETTINGS</h1>
 
       {/* Profile Details */}
-      <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center">
-            <User className="w-5 h-5 text-white" />
+      <Card className="p-8 bg-white border border-black/10 shadow-xl rounded-3xl">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
+            <User className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-lg font-semibold text-black">Profile Details</h2>
+          <h2 className="text-2xl font-black text-black uppercase tracking-tight">PROFILE DETAILS</h2>
         </div>
 
         {loadingProfile ? (
@@ -170,83 +170,83 @@ export default function SettingsPage() {
             ))}
           </div>
         ) : (
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label htmlFor="first-name" className="text-sm font-medium text-gray-500">First Name</Label>
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="first-name" className="text-[10px] font-black uppercase tracking-widest text-black/40">FIRST NAME</Label>
                 <Input
                   id="first-name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Enter first name"
-                  className="h-11 bg-white border-gray-300 focus:border-black text-black"
+                  className="h-14 bg-white border-2 border-black/10 focus:border-black text-black rounded-xl font-bold transition-all"
                 />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="last-name" className="text-sm font-medium text-gray-500">Last Name</Label>
+              <div className="space-y-2">
+                <Label htmlFor="last-name" className="text-[10px] font-black uppercase tracking-widest text-black/40">LAST NAME</Label>
                 <Input
                   id="last-name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Enter last name"
-                  className="h-11 bg-white border-gray-300 focus:border-black text-black"
+                  className="h-14 bg-white border-2 border-black/10 focus:border-black text-black rounded-xl font-bold transition-all"
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-sm font-medium text-gray-500">Email Address</Label>
-              <div className="h-11 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-lg text-black">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-black/40">EMAIL ADDRESS</Label>
+              <div className="h-14 px-4 flex items-center bg-black/5 border-2 border-black/10 rounded-xl text-black font-bold">
                 {email}
               </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-sm font-medium text-gray-500">Role</Label>
-              <div className="h-11 px-3 flex items-center bg-gray-50 border border-gray-200 rounded-lg text-black capitalize">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-black/40">ROLE</Label>
+              <div className="h-14 px-4 flex items-center bg-black/5 border-2 border-black/10 rounded-xl text-black font-bold capitalize">
                 {role || "student"}
               </div>
             </div>
 
             {profileError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-xs font-black uppercase tracking-widest text-red-700">
                 {profileError}
               </div>
             )}
             {profileSuccess && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                Profile updated successfully.
+              <div className="p-4 bg-green-50 border-2 border-green-200 rounded-xl text-xs font-black uppercase tracking-widest text-green-700">
+                PROFILE UPDATED SUCCESSFULLY.
               </div>
             )}
 
             <Button
               type="submit"
               disabled={isSavingProfile}
-              className="w-full h-11 bg-black hover:bg-black/80 text-white font-semibold"
+              className="w-full h-14 bg-black hover:bg-black/80 text-white font-black uppercase tracking-widest text-xs rounded-full shadow-md transition-all hover:-translate-y-0.5"
             >
-              {isSavingProfile ? "Saving..." : "Save Profile"}
+              {isSavingProfile ? "SAVING..." : "SAVE PROFILE"}
             </Button>
           </form>
         )}
       </Card>
 
       {/* Change Password */}
-      <Card className="p-6 bg-white border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center">
-            <Lock className="w-5 h-5 text-white" />
+      <Card className="p-8 bg-white border border-black/10 shadow-xl rounded-3xl">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
+            <Lock className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-lg font-semibold text-black">Change Password</h2>
+          <h2 className="text-2xl font-black text-black uppercase tracking-tight">CHANGE PASSWORD</h2>
         </div>
 
         {passwordSuccess ? (
-          <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
-            <span className="text-sm font-medium">Password updated successfully!</span>
+          <div className="flex items-center gap-3 p-5 bg-green-50 border-2 border-green-200 rounded-xl text-green-700">
+            <CheckCircle className="w-6 h-6 flex-shrink-0" />
+            <span className="text-xs font-black uppercase tracking-widest">PASSWORD UPDATED SUCCESSFULLY!</span>
           </div>
         ) : (
-          <form onSubmit={handleChangePassword} className="space-y-4">
+          <form onSubmit={handleChangePassword} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="new-password" className="text-sm font-semibold text-black">
-                New Password
+              <Label htmlFor="new-password" className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                NEW PASSWORD
               </Label>
               <Input
                 id="new-password"
@@ -255,12 +255,12 @@ export default function SettingsPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="h-11 bg-white border-gray-300 focus:border-black text-black"
+                className="h-14 bg-white border-2 border-black/10 focus:border-black text-black rounded-xl font-bold transition-all"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password" className="text-sm font-semibold text-black">
-                Confirm New Password
+              <Label htmlFor="confirm-password" className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                CONFIRM NEW PASSWORD
               </Label>
               <Input
                 id="confirm-password"
@@ -269,12 +269,12 @@ export default function SettingsPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="h-11 bg-white border-gray-300 focus:border-black text-black"
+                className="h-14 bg-white border-2 border-black/10 focus:border-black text-black rounded-xl font-bold transition-all"
               />
             </div>
 
             {passwordError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-xs font-black uppercase tracking-widest text-red-700">
                 {passwordError}
               </div>
             )}
@@ -282,67 +282,67 @@ export default function SettingsPage() {
             <Button
               type="submit"
               disabled={isChangingPassword}
-              className="w-full h-11 bg-black hover:bg-black/80 text-white font-semibold"
+              className="w-full h-14 bg-black hover:bg-black/80 text-white font-black uppercase tracking-widest text-xs rounded-full shadow-md transition-all hover:-translate-y-0.5"
             >
-              {isChangingPassword ? "Updating..." : "Update Password"}
+              {isChangingPassword ? "UPDATING..." : "UPDATE PASSWORD"}
             </Button>
           </form>
         )}
       </Card>
 
       {/* Danger Zone */}
-      <Card className="p-6 bg-white border border-red-200 shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center">
-            <Trash2 className="w-5 h-5 text-white" />
+      <Card className="p-8 bg-white border border-red-200 shadow-xl rounded-3xl">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+            <Trash2 className="w-6 h-6 text-white" />
           </div>
-          <h2 className="text-lg font-semibold text-red-700">Delete Account</h2>
+          <h2 className="text-2xl font-black text-red-700 uppercase tracking-tight">DELETE ACCOUNT</h2>
         </div>
 
-        <p className="text-sm text-gray-600 mb-4">
-          Permanently deletes your account and all associated data — profile, enrollments, and everything else. This cannot be undone.
+        <p className="text-xs font-bold uppercase tracking-widest text-black/50 mb-6 leading-relaxed">
+          PERMANENTLY DELETES YOUR ACCOUNT AND ALL ASSOCIATED DATA — PROFILE, ENROLLMENTS, AND EVERYTHING ELSE. THIS CANNOT BE UNDONE.
         </p>
 
         {!showDeleteConfirm ? (
           <Button
             variant="outline"
-            className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+            className="h-14 px-8 border-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-full font-black uppercase tracking-widest text-xs transition-all"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Delete my account
+            DELETE MY ACCOUNT
           </Button>
         ) : (
-          <div className="space-y-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-start gap-2 text-red-700">
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm font-medium">Type <strong>DELETE</strong> to confirm</span>
+          <div className="space-y-6 p-6 bg-red-50 border-2 border-red-200 rounded-3xl">
+            <div className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <span className="text-xs font-black uppercase tracking-widest">TYPE <strong>DELETE</strong> TO CONFIRM</span>
             </div>
             <Input
-              placeholder="Type DELETE here"
+              placeholder="TYPE DELETE HERE"
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
-              className="h-11 bg-white border-red-300 focus:border-red-500 text-black"
+              className="h-14 bg-white border-2 border-red-300 focus:border-red-500 text-black font-bold uppercase tracking-widest rounded-xl"
             />
             {deleteError && (
-              <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-sm text-red-700">
+              <div className="p-4 bg-red-100 border-2 border-red-300 rounded-xl text-xs font-black uppercase tracking-widest text-red-700">
                 {deleteError}
               </div>
             )}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 variant="outline"
-                className="flex-1 border-gray-300 text-gray-700"
+                className="flex-1 h-14 border-2 border-black/20 text-black/60 hover:text-black rounded-full font-black uppercase tracking-widest text-xs transition-all"
                 onClick={() => { setShowDeleteConfirm(false); setDeleteInput(""); setDeleteError(null) }}
                 disabled={isDeletingAccount}
               >
-                Cancel
+                CANCEL
               </Button>
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold"
+                className="flex-1 h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs rounded-full shadow-md transition-all shadow-red-600/20 disabled:opacity-50"
                 onClick={handleDeleteAccount}
                 disabled={deleteInput !== "DELETE" || isDeletingAccount}
               >
-                {isDeletingAccount ? "Deleting..." : "Permanently Delete"}
+                {isDeletingAccount ? "DELETING..." : "PERMANENTLY DELETE"}
               </Button>
             </div>
           </div>
