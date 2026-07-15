@@ -8,28 +8,19 @@ async function getPortalStats() {
     { count: userCount },
     { count: announcementCount },
     { count: adminCount },
-    { count: doubtCount },
     { count: resourceNotesCount },
-    { count: groupChatsCount },
-    { count: directChatsCount },
   ] = await Promise.all([
     service.from("profiles").select("id", { count: "exact", head: true }),
     service.from("announcements").select("id", { count: "exact", head: true }),
     service.from("profiles").select("id", { count: "exact", head: true }).eq("role", "admin"),
-    service.from("doubts").select("id", { count: "exact", head: true }),
     service.from("resources_notes").select("id", { count: "exact", head: true }).eq("status", "pending"),
-    service.from("subject_chat_groups").select("id", { count: "exact", head: true }),
-    service.from("mentor_direct_chats").select("id", { count: "exact", head: true }),
   ])
 
   return {
     users: userCount ?? 0,
     announcements: announcementCount ?? 0,
     admins: adminCount ?? 0,
-    doubts: doubtCount ?? 0,
     pendingResourcesNotes: resourceNotesCount ?? 0,
-    groupChats: groupChatsCount ?? 0,
-    directChats: directChatsCount ?? 0,
   }
 }
 
@@ -61,18 +52,6 @@ export default async function AdminPage() {
       description: "Create, edit, and delete announcements.",
       href: "/admin/announcements",
       value: stats.announcements,
-    },
-    {
-      title: "Doubts",
-      description: "Reply to student doubts and track resolution status.",
-      href: "/admin/doubts",
-      value: stats.doubts,
-    },
-    {
-      title: "Chats",
-      description: "Review all group conversations and personal direct chats.",
-      href: "/admin/chats",
-      value: `${stats.groupChats}/${stats.directChats}`,
     },
     {
       title: "Resources Notes",

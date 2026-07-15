@@ -102,14 +102,18 @@ export async function sendCourseWelcomeEmail(input: CourseWelcomeEmailInput): Pr
   const courseSummary = joinCourseTitles(courseTitles)
   const courseCardsHtml = safeCourses.length > 0
     ? `
-        <div style="margin: 24px 0 0 0;">
-          <p style="margin: 0 0 12px 0; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280;">Your enrolled courses</p>
+        <div style="margin: 24px 0;">
+          <p style="font-weight: 700; margin-bottom: 16px; font-size: 15px; color: #0f172a;">Your Enrolled Courses:</p>
           ${safeCourses.map((course) => `
-            <div style="margin: 0 0 12px 0; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; background: #ffffff;">
-              ${course.thumbnailUrl ? `<img src="${course.thumbnailUrl}" alt="${course.title}" style="display: block; width: 100%; max-height: 180px; object-fit: cover; border: 0;" />` : ""}
-              <div style="padding: 12px 14px;">
-                <p style="margin: 0; font-size: 15px; font-weight: 700; color: #111827;">${course.title}</p>
-              </div>
+            <div style="margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  ${course.thumbnailUrl ? `<td width="100" valign="middle"><img src="${course.thumbnailUrl}" alt="${course.title}" width="84" style="border-radius: 6px; display: block;" /></td>` : ""}
+                  <td valign="middle">
+                    <p style="margin: 0; font-weight: 600; font-size: 15px; color: #0f172a;">${course.title}</p>
+                  </td>
+                </tr>
+              </table>
             </div>
           `).join("")}
         </div>
@@ -123,41 +127,65 @@ export async function sendCourseWelcomeEmail(input: CourseWelcomeEmailInput): Pr
       ? "Your BSPrep enrollment is confirmed"
       : `Welcome to ${mainCourseTitle} at BSPrep`,
     html: `
-      <div style="margin: 0; padding: 24px 12px; background: #f3f4f6;">
-        <div style="max-width: 700px; margin: 0 auto; font-family: 'Space Grotesk', 'Inter', Arial, sans-serif; color: #111827;">
-          <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 18px; overflow: hidden; box-shadow: 0 12px 26px rgba(17, 24, 39, 0.08);">
-            <div style="padding: 26px 28px; background: linear-gradient(135deg, #0f172a 0%, #111827 60%, #1f2937 100%);">
-              <img src="${logoUrl}" alt="BSPrep" width="120" style="display: block; border: 0; border-radius: 8px; margin-bottom: 14px;" />
-              <p style="margin: 0 0 8px 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #86efac;">Enrollment confirmed</p>
-              <h1 style="margin: 0 0 10px 0; color: #ffffff; font-size: 32px; line-height: 1.15; letter-spacing: -0.03em;">Welcome to BSPrep</h1>
-              <p style="margin: 0; color: rgba(255, 255, 255, 0.9); font-size: 17px; line-height: 1.65;">Hi ${studentName}, your payment is complete and you are now enrolled in ${courseSummary}.</p>
-            </div>
-
-            <div style="padding: 26px 28px;">
-              <p style="margin: 0 0 14px 0; font-size: 16px; line-height: 1.75; color: #1f2937;">Your learning dashboard is ready with full access to your enrolled course content.</p>
-
-              <div style="margin: 0 0 18px 0; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px 18px; background: #f9fafb;">
-                <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6b7280;">Next steps</p>
-                <ol style="margin: 0; padding: 0 0 0 18px; color: #374151; line-height: 1.75; font-size: 14px;">
-                  <li>Open your dashboard and start your first lesson.</li>
-                  <li>Follow your weekly plan and track progress consistently.</li>
-                  <li>Use BSPrep resources and practice sessions to stay ahead.</li>
-                </ol>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+      </head>
+      <body style="margin: 0; padding: 40px 20px; background-color: #f1f5f9; font-family: 'Sora', Arial, sans-serif; color: #1e293b; -webkit-font-smoothing: antialiased;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+              
+              <!-- Header -->
+              <div style="padding: 24px 32px; border-bottom: 1px solid #e2e8f0;">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td valign="middle">
+                      <img src="${logoUrl}" width="40" height="40" style="border-radius: 50%; display: block; margin-right: 12px; object-fit: cover;" />
+                    </td>
+                    <td valign="middle">
+                      <span style="font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #0f172a;">BSPrep</span>
+                    </td>
+                  </tr>
+                </table>
               </div>
 
-              ${courseCardsHtml}
+              <!-- Hero Image -->
+              <img src="${new URL('/og-image.png', siteUrl).toString()}" alt="Enrollment Confirmed" width="600" style="display: block; width: 100%; max-width: 600px; height: auto;" />
 
-              <div style="text-align: center; margin: 24px 0 0 0;">
-                <a href="${dashboardUrl}" style="display: inline-block; background: #111827; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 13px 24px; border-radius: 999px;">Go to your dashboard</a>
+              <!-- Content -->
+              <div style="padding: 32px;">
+                <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 700; color: #0f172a;">Welcome, ${studentName}!</h1>
+                <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                    Your payment is complete and you are now officially enrolled in <strong>${courseSummary}</strong>. Get ready to showcase your skills and unlock an exciting chapter!
+                </p>
+
+                <h2 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #0f172a;">What Happens Next?</h2>
+                <ul style="margin: 0 0 32px 0; padding: 0 0 0 20px; color: #475569; font-size: 15px; line-height: 1.6;">
+                    <li style="margin-bottom: 8px;">Access your personalized dashboard immediately.</li>
+                    <li style="margin-bottom: 8px;">Find your video lectures and course tasks inside.</li>
+                    <li style="margin-bottom: 8px;">Complete the assigned tasks to move forward.</li>
+                </ul>
+
+                ${courseCardsHtml}
+
+                <div style="text-align: center; margin-top: 32px;">
+                    <a href="${dashboardUrl}" style="display: inline-block; background-color: #0f172a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600;">Go to Dashboard</a>
+                </div>
+                
+                <p style="margin: 32px 0 0 0; font-size: 14px; line-height: 1.6; color: #64748b; text-align: center;">
+                    If you have any queries, reach out to us at <a href="mailto:hello@bsprep.in" style="color: #2563eb; text-decoration: none; font-weight: 600;">hello@bsprep.in</a>.
+                </p>
               </div>
 
-              <p style="margin: 20px 0 0 0; font-size: 14px; line-height: 1.7; color: #6b7280;">If you are not signed in, log in with <strong style="color: #111827;">${studentEmail}</strong> and continue from your dashboard.</p>
-            </div>
           </div>
-
-          <p style="margin: 14px 0 0 0; text-align: center; font-size: 12px; color: #6b7280;">BSPrep Team · Structured learning for IITM BS students.</p>
-        </div>
-      </div>
+          
+          <div style="text-align: center; margin-top: 24px;">
+              <p style="font-size: 12px; color: #94a3b8;">&copy; 2026 BSPrep. All rights reserved.</p>
+          </div>
+      </body>
+      </html>
     `,
   })
 }

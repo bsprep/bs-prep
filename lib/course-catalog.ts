@@ -23,7 +23,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Master fundamental math concepts",
-    thumbnail: "/courses/math.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/math_imrnh0.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -36,7 +36,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Learn statistical thinking & analysis",
-    thumbnail: "/courses/stats.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/stats_pvtla1.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -49,7 +49,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Build problem-solving skills",
-    thumbnail: "/courses/ct.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/ct_s0tyon.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -62,7 +62,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Essential communication skills",
-    thumbnail: "/courses/english.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/english_h8y3dw.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -75,7 +75,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Learn Python from scratch and build real-world applications.",
-    thumbnail: "/courses/python.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110491/python_pjus5t.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -88,7 +88,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 4,
     description: "Master Object Oriented Programming principles with Java.",
-    thumbnail: "/courses/java.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/java_df4sxs.png",
     price: 499, originalPrice: 599,
     available: true,
     withCertificate: true
@@ -101,7 +101,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 12,
     description: "Advanced mathematical concepts",
-    thumbnail: "/courses/math.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/math_imrnh0.png",
     price: 129, originalPrice: 149,
     available: false,
     withCertificate: true
@@ -114,7 +114,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 12,
     description: "Advanced statistical methods",
-    thumbnail: "/courses/stats.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/stats_pvtla1.png",
     price: 129, originalPrice: 149,
     available: false,
     withCertificate: true
@@ -127,7 +127,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 12,
     description: "Python for data analysis",
-    thumbnail: "/courses/ct.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110491/python_pjus5t.png",
     price: 129, originalPrice: 149,
     available: false,
     withCertificate: true
@@ -140,7 +140,7 @@ export const courses: Course[] = [
     courseType: "course",
     weeks: 12,
     description: "Advanced communication skills",
-    thumbnail: "/courses/english.png",
+    thumbnail: "https://res.cloudinary.com/ddn6tl045/image/upload/v1784110490/english_h8y3dw.png",
     price: 129, originalPrice: 149,
     available: false,
     withCertificate: true
