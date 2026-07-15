@@ -53,5 +53,22 @@ export function getMentorSubjectCourseIds(profile: MentorSubjectProfileLike | nu
   const fromArray = Array.isArray(profile.mentor_subjects) ? profile.mentor_subjects : []
   const fromSingle = typeof profile.mentor_subject === "string" && profile.mentor_subject ? [profile.mentor_subject] : []
 
-  return Array.from(new Set([...fromArray, ...fromSingle])).filter((courseId) => SUBJECT_CHAT_COURSE_IDS.has(courseId))
+  const rawIds = Array.from(new Set([...fromArray, ...fromSingle].filter(Boolean)))
+  
+  const courseIdMap: Record<string, string> = {
+    'ct': 'qualifier-computational-thinking',
+    'stats-1': 'qualifier-stats-1',
+    'math-1': 'qualifier-math-1',
+    'english-1': 'qualifier-english-1',
+    'java': 'qualifier-java',
+    'python': 'qualifier-python',
+  };
+
+  const mappedIds = rawIds.flatMap(id => {
+    const normalized = String(id).toLowerCase();
+    const mapped = courseIdMap[normalized];
+    return mapped ? [id, mapped] : [id];
+  });
+
+  return Array.from(new Set(mappedIds));
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { hasAdminRole } from "@/lib/security/admin-role";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,30 +12,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const adminSupabase = createAdminClient();
-    const { data: profile } = await adminSupabase
-      .from("profiles")
-      .select("mentor_subject, mentor_subjects")
-      .eq("id", user.id)
-      .maybeSingle();
-      
-    const mentorSubject = profile?.mentor_subject || (profile?.mentor_subjects && profile.mentor_subjects[0]) || null;
-
-    if (!mentorSubject) {
-      return NextResponse.json({ classes: [], mentorSubject: null });
+    const isAdmin = await hasAdminRole(user.id, user.email);
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    let query = adminSupabase
+    const { data: classes, error } = await supabase
       .from("live_classes")
       .select("*")
-      .ilike("course", mentorSubject)
       .order("created_at", { ascending: false });
-
-    const { data: classes, error } = await query;
 
     if (error) throw error;
 
-    return NextResponse.json({ classes, mentorSubject });
+    return NextResponse.json({ classes });
   } catch (error: any) {
     console.error("Error fetching live classes:", error);
     return NextResponse.json({ error: "Failed to fetch classes" }, { status: 500 });
@@ -50,6 +40,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const isAdmin = await hasAdminRole(user.id, user.email);
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
     
     if (!body.course || !body.topic || !body.meeting_link || !body.time || !body.date) {
@@ -57,22 +52,10 @@ export async function POST(request: NextRequest) {
     }
 
     const adminSupabase = createAdminClient();
-    const { data: profile } = await adminSupabase
-      .from("profiles")
-      .select("mentor_subject, mentor_subjects")
-      .eq("id", user.id)
-      .maybeSingle();
-      
-    const mentorSubject = profile?.mentor_subject || (profile?.mentor_subjects && profile.mentor_subjects[0]) || null;
-
-    if (!mentorSubject) {
-      return NextResponse.json({ error: "You are not assigned to a subject" }, { status: 403 });
-    }
-
     const { data, error } = await adminSupabase
       .from("live_classes")
       .insert([{
-        course: mentorSubject, // Force mentor's actual subject
+        course: body.course,
         topic: body.topic,
         meeting_link: body.meeting_link,
         youtube_link: body.youtube_link || null,
@@ -97,8 +80,8 @@ export async function POST(request: NextRequest) {
         'qualifier-java': 'qualifier-java'
       };
       
-      const normalizedCourse = mentorSubject.toLowerCase();
-      const mappedCourseId = courseIdMap[normalizedCourse] || mentorSubject;
+      const normalizedCourse = body.course.toLowerCase();
+      const mappedCourseId = courseIdMap[normalizedCourse] || body.course;
       
       // 1. Fetch enrolled students
       let enrolledUserIds: string[] = [];
@@ -205,7 +188,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = request.nextUrl.searchParams.get("id");
+    const isAdmin = await hasAdminRole(user.id, user.email);
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
 
     if (!id) {
       return NextResponse.json({ error: "Missing class ID" }, { status: 400 });

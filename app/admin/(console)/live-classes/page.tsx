@@ -17,7 +17,6 @@ export default function MentorLiveClassesPage() {
   const [classes, setClasses] = useState<LiveClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mentorSubject, setMentorSubject] = useState<string | null>(null);
 
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -34,15 +33,10 @@ export default function MentorLiveClassesPage() {
   const fetchClasses = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/mentor/live-classes?t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/admin/live-classes?t=${Date.now()}`, { cache: 'no-store' });
       if (!res.ok) throw new Error("Failed to fetch classes");
       const data = await res.json();
       setClasses(data.classes || []);
-      
-      if (data.mentorSubject) {
-        setMentorSubject(data.mentorSubject);
-        setFormData(prev => ({ ...prev, course: data.mentorSubject }));
-      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -58,7 +52,7 @@ export default function MentorLiveClassesPage() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/mentor/live-classes", {
+      const res = await fetch("/api/admin/live-classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -67,7 +61,7 @@ export default function MentorLiveClassesPage() {
       await fetchClasses();
       setShowForm(false);
       setFormData({
-        course: mentorSubject || "python",
+        course: "python",
         topic: "",
         meeting_link: "",
         time: "19:00",
@@ -84,7 +78,7 @@ export default function MentorLiveClassesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this class?")) return;
     try {
-      const res = await fetch(`/api/mentor/live-classes?id=${id}`, {
+      const res = await fetch(`/api/admin/live-classes?id=${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
@@ -102,11 +96,11 @@ export default function MentorLiveClassesPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-emerald-50">Live Classes</h1>
-            <div className="group relative flex cursor-help items-center justify-center rounded-full bg-emerald-500/20 w-5 h-5 text-xs font-bold text-emerald-300">
+            <h1 className="text-2xl font-bold text-slate-100">Live Classes</h1>
+            <div className="group relative flex cursor-help items-center justify-center rounded-full bg-slate-500/20 w-5 h-5 text-xs font-bold text-slate-300">
               ?
-              <div className="absolute left-1/2 top-full z-50 mt-2 hidden w-64 -translate-x-1/2 rounded-lg border border-emerald-500/30 bg-[#0f1f26] p-3 text-xs font-normal text-emerald-100/90 shadow-xl group-hover:block">
-                <p className="mb-2 font-semibold text-emerald-300">Valid Course Codes:</p>
+              <div className="absolute left-1/2 top-full z-50 mt-2 hidden w-64 -translate-x-1/2 rounded-lg border border-slate-500/30 bg-[#0c1016] p-3 text-xs font-normal text-slate-300 shadow-xl group-hover:block">
+                <p className="mb-2 font-semibold text-slate-100">Valid Course Codes:</p>
                 <ul className="list-disc pl-4 space-y-1">
                   <li><code>python</code></li>
                   <li><code>math-1</code></li>
@@ -118,7 +112,7 @@ export default function MentorLiveClassesPage() {
               </div>
             </div>
           </div>
-          <p className="text-emerald-100/60 text-sm">Manage student live classes (LMS)</p>
+          <p className="text-slate-400 text-sm">Manage student live classes (LMS)</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -133,13 +127,12 @@ export default function MentorLiveClassesPage() {
           <h2 className="text-lg font-semibold text-emerald-50">Create New Class</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-emerald-100/70 mb-1">Course Code</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Course Code</label>
               <input
                 required
                 type="text"
-                disabled={!!mentorSubject}
                 placeholder="e.g. qualifier-python, ct, stats-1"
-                className="w-full bg-[#0f1f26] border border-white/10 rounded-lg px-3 py-2 text-emerald-50 focus:outline-none focus:border-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#131821] border border-white/10 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-slate-500"
                 value={formData.course}
                 onChange={e => setFormData({ ...formData, course: e.target.value })}
               />

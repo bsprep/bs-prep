@@ -12,9 +12,9 @@ type MentorProfileRow = {
   mentor_subjects: string[] | null
 }
 
-async function getCommunityStudentCount(service: ReturnType<typeof createServiceRoleClient>, mentorId: string, courseIds: string[]) {
+async function getCommunityStudents(service: ReturnType<typeof createServiceRoleClient>, mentorId: string, courseIds: string[]) {
   if (courseIds.length === 0) {
-    return 0
+    return []
   }
 
   const enrollmentColumns: Array<"user_id" | "student_id"> = ["user_id", "student_id"]
@@ -45,19 +45,26 @@ async function getCommunityStudentCount(service: ReturnType<typeof createService
       .select("student_id")
       .eq("mentor_id", mentorId)
 
-    return Array.from(new Set((directChats ?? []).map((row) => String(row.student_id ?? "")).filter(Boolean))).length
+    enrolledIds = Array.from(new Set((directChats ?? []).map((row) => String(row.student_id ?? "")).filter(Boolean)))
   }
 
-  const { data: profiles, error: profilesError } = await service.from("profiles").select("id, role").in("id", enrolledIds)
+  if (enrolledIds.length === 0) {
+    return []
+  }
+
+  const { data: profiles, error: profilesError } = await service
+    .from("profiles")
+    .select("id, role, first_name, last_name, email, avatar_url")
+    .in("id", enrolledIds)
 
   if (profilesError || !profiles) {
-    return enrolledIds.length
+    return []
   }
 
   return profiles.filter((profile) => {
     const normalizedRole = String(profile.role ?? "student").toLowerCase()
     return normalizedRole !== "admin" && normalizedRole !== "mentor"
-  }).length
+  })
 }
 
 export default async function MentorDashboardPage() {
@@ -91,7 +98,7 @@ export default async function MentorDashboardPage() {
     (typeof user.user_metadata?.avatar_url === "string" ? user.user_metadata.avatar_url : null) ||
     (typeof user.user_metadata?.picture === "string" ? user.user_metadata.picture : null)
 
-  const communityStudentCount = await getCommunityStudentCount(service, user.id, mentorCourseIds)
+  const communityStudents = await getCommunityStudents(service, user.id, mentorCourseIds)
 
   return (
     <div className="space-y-6">
@@ -126,20 +133,46 @@ export default async function MentorDashboardPage() {
 
         <article className="rounded-2xl border border-white/10 bg-[#102329] p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-emerald-100/60">Community</p>
-          <p className="mt-3 text-3xl font-bold text-emerald-200">{communityStudentCount}</p>
+          <p className="mt-3 text-3xl font-bold text-emerald-200">{communityStudents.length}</p>
           <p className="mt-1 text-sm text-emerald-100/75">Students in your community</p>
           <p className="mt-3 text-xs text-emerald-100/60">Based on your assigned subject groups and active direct chats.</p>
         </article>
       </section>
 
-      <div>
-        <Link
-          href="/mentor/chats"
-          className="inline-flex h-10 items-center rounded-lg border border-emerald-300/40 bg-emerald-400/10 px-4 text-sm font-semibold text-emerald-100 transition hover:bg-emerald-400/20"
-        >
-          Open Student Chats
-        </Link>
-      </div>
+      {/* Community Students List */}
+      <section className="rounded-2xl border border-white/10 bg-[#102329] p-5">
+        <p className="mb-4 text-xs uppercase tracking-[0.2em] text-emerald-100/60">Your Students</p>
+        {communityStudents.length === 0 ? (
+          <p className="text-sm text-emerald-100/70">No students enrolled in your subject yet.</p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {communityStudents.map((student) => {
+              const fullName = `${student.first_name || ""} ${student.last_name || ""}`.trim() || "Student"
+              const initials = (student.first_name?.[0] || student.email?.[0] || "S").toUpperCase()
+              return (
+                <div key={student.id} className="flex items-center gap-3 rounded-xl border border-white/5 bg-[#152a33] p-3">
+                  {student.avatar_url ? (
+                    <img
+                      src={student.avatar_url}
+                      alt={fullName}
+                      className="h-10 w-10 shrink-0 rounded-full border border-white/10 object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-[#1a3741] text-sm font-semibold text-emerald-100">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-emerald-50">{fullName}</p>
+                    <p className="truncate text-xs text-emerald-100/70">{student.email}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </section>
     </div>
   )
 }

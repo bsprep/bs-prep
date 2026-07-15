@@ -13,6 +13,9 @@ import {
   MessageSquare,
   MessagesSquare,
   Users,
+  Menu,
+  X,
+  Video
 } from "lucide-react"
 import { AdminRefreshButton } from "@/components/admin-refresh-button"
 
@@ -63,39 +66,15 @@ export default async function AdminConsoleLayout({ children }: AdminLayoutProps)
       active: true,
     },
     {
-      label: "Doubts",
-      href: "/admin/doubts",
-      icon: MessageSquare,
-      active: true,
-    },
-    {
-      label: "Chats",
-      href: "/admin/chats",
-      icon: MessagesSquare,
+      label: "Live Classes",
+      href: "/admin/live-classes",
+      icon: Video,
       active: true,
     },
     {
       label: "Resources Notes",
       href: "/admin/resources-notes",
       icon: BookOpen,
-      active: true,
-    },
-    {
-      label: "Donations",
-      href: "/admin/donations",
-      icon: HandHeart,
-      active: true,
-    },
-    {
-      label: "Analytics",
-      href: "/admin/analytics",
-      icon: BarChart2,
-      active: true,
-    },
-    {
-      label: "Certificates",
-      href: "/admin/certificates",
-      icon: Award,
       active: true,
     },
     {
@@ -112,12 +91,25 @@ export default async function AdminConsoleLayout({ children }: AdminLayoutProps)
     (typeof user.user_metadata?.picture === "string" ? user.user_metadata.picture : null)
 
   return (
-    <main className="h-screen overflow-hidden bg-[#050608] text-slate-100">
+    <main className="h-screen overflow-hidden bg-[#050608] text-slate-100 relative">
       <div className="mx-auto flex h-full w-full max-w-screen-2xl gap-0 px-0 md:px-4">
-        <aside className="hidden h-screen w-64 shrink-0 border-r border-white/5 bg-[#080a0d] p-5 md:flex md:flex-col">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Management Console</p>
+        <input type="checkbox" id="admin-mobile-menu" className="peer hidden" />
+        
+        {/* Mobile Overlay */}
+        <label 
+          htmlFor="admin-mobile-menu" 
+          className="fixed inset-0 z-40 hidden bg-black/80 backdrop-blur-sm peer-checked:block md:hidden cursor-pointer"
+        />
+
+        <aside className="fixed inset-y-0 left-0 z-50 flex h-screen w-64 -translate-x-full flex-col border-r border-white/5 bg-[#080a0d] p-5 transition-transform duration-300 peer-checked:translate-x-0 md:static md:translate-x-0 md:shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
+              <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Management Console</p>
+            </div>
+            <label htmlFor="admin-mobile-menu" className="md:hidden cursor-pointer text-slate-400 hover:text-white p-1">
+              <X className="h-5 w-5" />
+            </label>
           </div>
 
           <nav className="mt-8 space-y-2">
@@ -170,7 +162,10 @@ export default async function AdminConsoleLayout({ children }: AdminLayoutProps)
 
         <section className="flex h-screen min-h-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b border-white/5 bg-[#090b10]/80 px-4 py-4 backdrop-blur md:px-7">
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between md:justify-end">
+              <label htmlFor="admin-mobile-menu" className="md:hidden cursor-pointer text-slate-300 hover:text-white p-1">
+                <Menu className="h-6 w-6" />
+              </label>
               <AdminRefreshButton />
             </div>
           </div>

@@ -12,6 +12,7 @@ import { Features } from "@/components/home/Features"
 import { Courses } from "@/components/home/Courses"
 import { Faq } from "@/components/home/Faq"
 import { Cta } from "@/components/home/Cta"
+import { AmbassadorSection } from "@/components/home/ambassador-section"
 
 const spinner = <div className="animate-spin w-6 h-6 border-2 border-[#e5e7eb] border-t-[#111111] rounded-full" />
 
@@ -57,6 +58,7 @@ export default function HomePage() {
         <QualifierCountdown />
         <Features />
         <Courses />
+        <AmbassadorSection />
         <StaggerTestimonials />
         <Cta setShowLogin={setShowLogin} />
         <Faq />

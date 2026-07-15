@@ -14,6 +14,7 @@ type DirectoryUser = {
   avatar_url: string | null
   created_at: string
   is_enrolled: boolean
+  mentor_subject: string | null
 }
 
 type UserEnrollment = {
@@ -27,6 +28,8 @@ export default function AdminUsersDirectoryPage() {
   const [users, setUsers] = useState<DirectoryUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchValue, setSearchValue] = useState("")
+  const [roleFilter, setRoleFilter] = useState("all")
+  const [proFilter, setProFilter] = useState("all")
 
   const [enrolledUserIds, setEnrolledUserIds] = useState<Set<string>>(new Set())
 
@@ -36,6 +39,8 @@ export default function AdminUsersDirectoryPage() {
   const [editFirstName, setEditFirstName] = useState("")
   const [editLastName, setEditLastName] = useState("")
   const [editPhone, setEditPhone] = useState("")
+  const [editRole, setEditRole] = useState("")
+  const [editMentorSubject, setEditMentorSubject] = useState("")
   const [editStatus, setEditStatus] = useState("")
   const [isEditProcessing, setIsEditProcessing] = useState(false)
 
@@ -69,16 +74,37 @@ export default function AdminUsersDirectoryPage() {
   }, [])
 
   const filteredUsers = useMemo(() => {
-    const query = searchValue.trim().toLowerCase()
-    if (!query) {
-      return users
+    let result = users
+
+    if (roleFilter !== "all") {
+      result = result.filter((u) => {
+        const normalizedRole = (u.role || "student").toLowerCase()
+        if (roleFilter === "admin") return normalizedRole === "admin"
+        if (roleFilter === "mentor") return normalizedRole === "mentor"
+        if (roleFilter === "student") return normalizedRole !== "admin" && normalizedRole !== "mentor"
+        return true
+      })
     }
 
-    return users.filter((user) => {
-      const fullName = (user.full_name || `${user.first_name ?? ""} ${user.last_name ?? ""}`).toLowerCase()
-      return fullName.includes(query) || user.email.toLowerCase().includes(query)
-    })
-  }, [searchValue, users])
+    if (proFilter !== "all") {
+      result = result.filter((u) => {
+        const isPro = enrolledUserIds.has(u.id)
+        if (proFilter === "pro") return isPro
+        if (proFilter === "non-pro") return !isPro
+        return true
+      })
+    }
+
+    const query = searchValue.trim().toLowerCase()
+    if (query) {
+      result = result.filter((user) => {
+        const fullName = (user.full_name || `${user.first_name ?? ""} ${user.last_name ?? ""}`).toLowerCase()
+        return fullName.includes(query) || user.email.toLowerCase().includes(query)
+      })
+    }
+
+    return result
+  }, [searchValue, users, roleFilter, proFilter, enrolledUserIds])
 
   const admins = useMemo(
     () => filteredUsers.filter((u) => (u.role || "student").toLowerCase() === "admin"),
@@ -102,6 +128,8 @@ export default function AdminUsersDirectoryPage() {
     setEditFirstName(user.first_name || "")
     setEditLastName(user.last_name || "")
     setEditPhone(user.phone || "")
+    setEditRole(user.role || "student")
+    setEditMentorSubject(user.mentor_subject || "")
     setEditStatus("")
   }
 
@@ -110,6 +138,7 @@ export default function AdminUsersDirectoryPage() {
     setEditFirstName("")
     setEditLastName("")
     setEditPhone("")
+    setEditRole("")
     setEditStatus("")
   }
 
@@ -127,6 +156,8 @@ export default function AdminUsersDirectoryPage() {
           first_name: editFirstName.trim() || null,
           last_name: editLastName.trim() || null,
           phone: editPhone.trim() || null,
+          role: editRole,
+          mentor_subject: editMentorSubject.trim() || null,
         }),
       })
 
@@ -145,6 +176,8 @@ export default function AdminUsersDirectoryPage() {
                 first_name: editFirstName.trim() || null,
                 last_name: editLastName.trim() || null,
                 phone: editPhone.trim() || null,
+                role: editRole,
+                mentor_subject: editMentorSubject.trim() || null,
               }
             : u,
         ),
@@ -372,17 +405,55 @@ export default function AdminUsersDirectoryPage() {
           <p className="mt-1 text-sm text-slate-400">Search, edit, and delete users cleanly.</p>
         </div>
 
-        <label className="flex h-11 w-full max-w-xs items-center gap-2 rounded-xl border border-white/10 bg-[#131821] px-3 text-sm text-slate-400">
-          <Search className="h-4 w-4" />
-          <input
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search by name or email..."
-            className="h-full w-full bg-transparent text-slate-200 outline-none placeholder:text-slate-500"
-            suppressHydrationWarning
-          />
-        </label>
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+          <select 
+            value={roleFilter} 
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="h-11 rounded-xl border border-white/10 bg-[#131821] px-3 text-sm text-slate-200 outline-none"
+          >
+            <option value="all">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="mentor">Mentor</option>
+            <option value="student">Student</option>
+          </select>
+          
+          <select 
+            value={proFilter} 
+            onChange={(e) => setProFilter(e.target.value)}
+            className="h-11 rounded-xl border border-white/10 bg-[#131821] px-3 text-sm text-slate-200 outline-none"
+          >
+            <option value="all">All Status</option>
+            <option value="pro">Pro (Paid)</option>
+            <option value="non-pro">Non-Pro (Free)</option>
+          </select>
+
+          <label className="flex h-11 w-full sm:w-64 items-center gap-2 rounded-xl border border-white/10 bg-[#131821] px-3 text-sm text-slate-400">
+            <Search className="h-4 w-4" />
+            <input
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Search by name or email..."
+              className="h-full w-full bg-transparent text-slate-200 outline-none placeholder:text-slate-500"
+              suppressHydrationWarning
+            />
+          </label>
+        </div>
       </header>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
+          <p className="text-xs uppercase tracking-wider text-slate-500">Admins</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{admins.length}</p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
+          <p className="text-xs uppercase tracking-wider text-slate-500">Mentors</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{mentors.length}</p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
+          <p className="text-xs uppercase tracking-wider text-slate-500">Students</p>
+          <p className="mt-1 text-2xl font-semibold text-slate-100">{students.length}</p>
+        </div>
+      </div>
 
       {statusMessage ? <p className="text-sm text-slate-300">{statusMessage}</p> : null}
 
@@ -401,20 +472,7 @@ export default function AdminUsersDirectoryPage() {
         )}
       </section>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
-          <p className="text-xs uppercase tracking-wider text-slate-500">Admins</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-100">{admins.length}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
-          <p className="text-xs uppercase tracking-wider text-slate-500">Mentors</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-100">{mentors.length}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-[#0c1016] px-4 py-3">
-          <p className="text-xs uppercase tracking-wider text-slate-500">Students</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-100">{students.length}</p>
-        </div>
-      </div>
+
 
       {editingUserId && (
         <section className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -455,6 +513,32 @@ export default function AdminUsersDirectoryPage() {
                   className="mt-1 w-full rounded-lg border border-white/10 bg-[#131821] px-3 py-2 text-slate-100 outline-none"
                 />
               </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400">Access Level</label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/10 bg-[#131821] px-3 py-2 text-slate-100 outline-none"
+                >
+                  <option value="student">Student</option>
+                  <option value="mentor">Mentor</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              {editRole === "mentor" && (
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-slate-400">Mentor Subject Code</label>
+                  <input
+                    type="text"
+                    value={editMentorSubject}
+                    onChange={(e) => setEditMentorSubject(e.target.value)}
+                    placeholder="e.g. math-1, python, ct"
+                    className="mt-1 w-full rounded-lg border border-white/10 bg-[#131821] px-3 py-2 text-slate-100 outline-none"
+                  />
+                </div>
+              )}
             </div>
 
             {editStatus ? <p className="mt-3 text-xs text-rose-300">{editStatus}</p> : null}
