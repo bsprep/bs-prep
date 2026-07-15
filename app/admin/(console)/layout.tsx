@@ -14,7 +14,8 @@ import {
   MessagesSquare,
   Users,
   Menu,
-  X
+  X,
+  Video
 } from "lucide-react"
 import { AdminRefreshButton } from "@/components/admin-refresh-button"
 
@@ -62,6 +63,12 @@ export default async function AdminConsoleLayout({ children }: AdminLayoutProps)
       label: "Announcements",
       href: "/admin/announcements",
       icon: Megaphone,
+      active: true,
+    },
+    {
+      label: "Live Classes",
+      href: "/admin/live-classes",
+      icon: Video,
       active: true,
     },
     {

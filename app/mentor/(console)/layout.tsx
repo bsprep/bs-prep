@@ -2,7 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { hasMentorRole } from "@/lib/security/mentor-role"
-import { LogOut, MessageCircle, LayoutDashboard, Video } from "lucide-react"
+import { LogOut, LayoutDashboard, Video, Menu, X } from "lucide-react"
 
 type MentorConsoleLayoutProps = {
   children: React.ReactNode
@@ -42,11 +42,6 @@ export default async function MentorConsoleLayout({ children }: MentorConsoleLay
       href: "/mentor/live-classes",
       icon: Video,
     },
-    {
-      label: "Student Chats",
-      href: "/mentor/chats",
-      icon: MessageCircle,
-    },
   ]
 
   const avatarUrl =
@@ -60,12 +55,25 @@ export default async function MentorConsoleLayout({ children }: MentorConsoleLay
     "Mentor"
 
   return (
-    <main className="h-screen overflow-hidden bg-[#0b141a] text-slate-100">
+    <main className="h-screen overflow-hidden bg-[#0b141a] text-slate-100 relative">
       <div className="mx-auto flex h-full w-full max-w-screen-2xl gap-0 px-0 md:px-4">
-        <aside className="hidden h-screen w-72 shrink-0 border-r border-white/5 bg-[#0f1f26] p-5 md:flex md:flex-col">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight text-emerald-200">Mentor</h1>
-            <p className="text-xs uppercase tracking-[0.24em] text-emerald-100/60">Student Support Desk</p>
+        <input type="checkbox" id="mentor-mobile-menu" className="peer hidden" />
+        
+        {/* Mobile Overlay */}
+        <label 
+          htmlFor="mentor-mobile-menu" 
+          className="fixed inset-0 z-40 hidden bg-black/80 backdrop-blur-sm peer-checked:block md:hidden cursor-pointer"
+        />
+
+        <aside className="fixed inset-y-0 left-0 z-50 flex h-screen w-72 -translate-x-full flex-col border-r border-white/5 bg-[#0f1f26] p-5 transition-transform duration-300 peer-checked:translate-x-0 md:static md:translate-x-0 md:shrink-0">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold tracking-tight text-emerald-200">Mentor</h1>
+              <p className="text-xs uppercase tracking-[0.24em] text-emerald-100/60">Student Support Desk</p>
+            </div>
+            <label htmlFor="mentor-mobile-menu" className="md:hidden cursor-pointer text-emerald-100/70 hover:text-emerald-50 p-1">
+              <X className="h-5 w-5" />
+            </label>
           </div>
 
           <nav className="mt-8 space-y-2">
@@ -119,7 +127,12 @@ export default async function MentorConsoleLayout({ children }: MentorConsoleLay
         <section className="flex h-screen min-h-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b border-white/5 bg-[#11252d] px-4 py-4 md:px-7">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100/80">Mentor Dashboard</h2>
+              <div className="flex items-center gap-3">
+                <label htmlFor="mentor-mobile-menu" className="md:hidden cursor-pointer text-emerald-100/70 hover:text-emerald-50 p-1 -ml-2">
+                  <Menu className="h-6 w-6" />
+                </label>
+                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-100/80 hidden sm:block">Mentor Dashboard</h2>
+              </div>
               <span className="rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-100">
                 Live Support
               </span>
