@@ -31,4 +31,7 @@ next-env.d.ts
 config.bat
 
 
-api-routes.md 
+api-routes.md
+
+# API Docs (separate standalone Vercel site)
+/api-docs-site/

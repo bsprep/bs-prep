@@ -153,7 +153,9 @@ export function Footer() {
                 </a>
                 
                 <div className="pt-2">
-                  <iframe src="https://status.bsprep.in/badge?theme=dark" width="250" height="30" frameBorder="0" scrolling="no" style={{ colorScheme: 'normal' }}></iframe>
+                  <a href="https://status.bsprep.in" target="_blank" rel="noopener noreferrer">
+                    <img src="https://status.bsprep.in/badge?theme=dark" alt="Platform Status" className="h-[30px]" />
+                  </a>
                 </div>
               </div>
             </div>
