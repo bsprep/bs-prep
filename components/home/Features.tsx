@@ -63,6 +63,8 @@ export function Features() {
               muted={true}
               playsInline
               preload="auto"
+              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+              onLoadedData={(e) => e.currentTarget.play().catch(() => {})}
               className="w-full h-auto block"
             >
               <source src="https://res.cloudinary.com/ddn6tl045/video/upload/v1784173034/Screen_Recording_2026-07-16_090305_f97ck3.mp4" type="video/mp4" />
@@ -85,6 +87,8 @@ export function Features() {
               muted={true}
               playsInline
               preload="auto"
+              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+              onLoadedData={(e) => e.currentTarget.play().catch(() => {})}
               className="w-full h-auto block"
             >
               <source src="https://res.cloudinary.com/ddn6tl045/video/upload/v1784173705/Screen_Recording_2026-07-16_091636_epook1.mp4" type="video/mp4" />
@@ -169,6 +173,8 @@ export function Features() {
               muted={true}
               playsInline
               preload="auto"
+              onCanPlay={(e) => e.currentTarget.play().catch(() => {})}
+              onLoadedData={(e) => e.currentTarget.play().catch(() => {})}
               className="w-full h-auto block"
             >
               <source src="https://res.cloudinary.com/ddn6tl045/video/upload/v1784174567/Screen_Recording_2026-07-16_092118_fk9jpd.mp4" type="video/mp4" />
