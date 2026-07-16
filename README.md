@@ -81,8 +81,8 @@ The goal is to make sure no student fails the Qualifier just because they did no
 | Payments | Razorpay with server-side order creation and webhook verification |
 | Bot Protection | Cloudflare Turnstile |
 | Deployment | Vercel |
-| Analytics | Vercel Analytics |
-| Media CDN | Cloudinary for video hosting |
+| Analytics | Vercel Analytics, Google Analytics |
+| Media CDN | Cloudinary for video hosting, Github cdn for Images |
 
 ### Editor and Compiler
 
