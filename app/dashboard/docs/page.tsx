@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpRight, Book, Calendar, Bell, LineChart, MessagesSquare, Archive, GraduationCap } from "lucide-react"
+import { ArrowUpRight, Book, Calendar, Bell, FileSpreadsheet, LineChart, MessagesSquare, Archive, GraduationCap } from "lucide-react"
 import { IconTile, PageHeader } from "@/components/dashboard/ui"
 
 const DOCS_LINKS = [
@@ -66,6 +66,20 @@ const DOCS_LINKS = [
     url: "https://docs.google.com/document/u/1/d/e/2PACX-1vSWW4TMd2ujKYOeSay5iCIyTGLtJgM1KWC-Ernu_JdhugLtB0dXV9i966Z-ZaPZ9qAAI1_QtWa3o3br/pub#h.64f8davxbp1d",
     icon: GraduationCap,
     tone: "cyan" as const,
+  },
+  {
+    title: "NPTEL Dept / Free Electives",
+    description: "Official list of approved NPTEL courses eligible for Department and Free Elective credits.",
+    url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJXV0JECyoQvgWvBlVxO13G0KRm5a1qNCRBa7rAw8GDY4e0cfm1KiVCwIgs_ed80ObtzQ1rfx_JWIR/pubhtml?gid=399341609&single=true",
+    icon: FileSpreadsheet,
+    tone: "primary" as const,
+  },
+  {
+    title: "NPTEL HS/MG Electives",
+    description: "Approved NPTEL courses for Humanities and Management credit requirements.",
+    url: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJXV0JECyoQvgWvBlVxO13G0KRm5a1qNCRBa7rAw8GDY4e0cfm1KiVCwIgs_ed80ObtzQ1rfx_JWIR/pubhtml?gid=1418834182&single=true",
+    icon: FileSpreadsheet,
+    tone: "green" as const,
   },
 ]
 
