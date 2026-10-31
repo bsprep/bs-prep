@@ -15,6 +15,7 @@ import { Cta } from "@/components/home/Cta"
 import { AmbassadorSection } from "@/components/home/ambassador-section"
 import { AboutSection } from "@/components/home/about-section"
 
+
 const spinner = <div className="animate-spin w-6 h-6 border-2 border-[#e5e7eb] border-t-[#111111] rounded-full" />
 
 const StaggerTestimonials = dynamic(() => import("@/components/stagger-testimonials").then(mod => ({ default: mod.StaggerTestimonials })), {
