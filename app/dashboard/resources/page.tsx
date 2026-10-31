@@ -7,10 +7,10 @@ import { Segmented, SearchBox } from "@/components/dashboard/controls"
 import { Avatar, EmptyState, Field, Notice, PageHeader, Tag, btnGhost, btnPrimary, field } from "@/components/dashboard/ui"
 import { cn } from "@/lib/utils"
 import dynamic from "next/dynamic"
-import { Dropdown } from "@/components/resources/dropdown"
-import { subjectsFor } from "@/lib/resources-subjects"
+import { courseData } from "@/lib/gpa/course-data"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, Download, Library, Plus, Star } from "lucide-react"
+import { ArrowLeft, ArrowRight, CheckCircle2, CircleHelp, ExternalLink, Library, Plus, Star } from "lucide-react" // ArrowRight kept for potential future use
+import { DashboardCuratedResources } from "@/components/resources/dashboard-curated-resources"
 
 const LoginModal = dynamic(
   () => import("@/components/auth/login-modal").then((m) => ({ default: m.LoginModal })),
@@ -39,8 +39,6 @@ type ResourceNote = {
   contributor_name: string
   notes_content_label: string
   drive_link: string
-  downloads?: number
-  contributor_avatar?: string | null
   created_at: string
   stars: number
   user_starred: boolean
@@ -71,15 +69,9 @@ const degreeLabels: Record<DegreeValue, string> = {
 
 const degreeValues = Object.keys(degreeLabels) as DegreeValue[]
 
-type NoteKind = "weeks" | "book" | "summary" | "other"
-const kindLabels: Record<NoteKind, string> = { weeks: "Weeks", book: "Book", summary: "Summary", other: "Other" }
-
 const initialForm = {
-  kind: "weeks" as NoteKind,
   notesWeekFrom: "1",
-  notesWeekTo: "",
-  label: "",
-  anonymous: false,
+  notesWeekTo: "12",
   contributorName: "",
   driveLink: "",
 }
@@ -113,7 +105,7 @@ export default function DashboardResourcesPage() {
   const [showXpGuide, setShowXpGuide] = useState(false)
 
   const [selectedDegree, setSelectedDegree] = useState<DegreeValue>("data-science")
-  const [selectedLevel, setSelectedLevel] = useState<LevelValue>("foundation")
+  const [selectedLevel, setSelectedLevel] = useState<LevelValue>("diploma")
   const [selectedSubject, setSelectedSubject] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -130,7 +122,17 @@ export default function DashboardResourcesPage() {
   const [signUpOpen, setSignUpOpen] = useState(false)
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
 
-  const subjectsForSelection = useMemo(() => subjectsFor(selectedDegree, selectedLevel), [selectedDegree, selectedLevel])
+  const subjectsForSelection = useMemo(() => {
+    const unique = new Set<string>()
+
+    for (const course of courseData) {
+      if (course.degree === selectedDegree && course.level === selectedLevel) {
+        unique.add(course.name)
+      }
+    }
+
+    return Array.from(unique)
+  }, [selectedDegree, selectedLevel])
 
   const filteredNotes = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
@@ -152,10 +154,6 @@ export default function DashboardResourcesPage() {
         )
       })
       .sort((a, b) => {
-        if ((b.downloads ?? 0) !== (a.downloads ?? 0)) {
-          return (b.downloads ?? 0) - (a.downloads ?? 0)
-        }
-
         if (b.stars !== a.stars) {
           return b.stars - a.stars
         }
@@ -166,8 +164,8 @@ export default function DashboardResourcesPage() {
 
   const currentWeekFrom = Number(formData.notesWeekFrom)
   const currentWeekTo = Number(formData.notesWeekTo)
-  const hasValidWeekRange = Number.isInteger(currentWeekFrom) && currentWeekFrom > 0 && (formData.notesWeekTo.trim() === "" || currentWeekTo >= currentWeekFrom)
-  const dynamicWeekLabel = formData.kind !== "weeks" ? (formData.kind === "other" ? formData.label || "These notes" : kindLabels[formData.kind]) : hasValidWeekRange ? `Weeks ${currentWeekFrom}-${currentWeekTo || currentWeekFrom}` : "Selected weeks"
+  const hasValidWeekRange = Number.isInteger(currentWeekFrom) && Number.isInteger(currentWeekTo) && currentWeekFrom > 0 && currentWeekTo >= currentWeekFrom
+  const dynamicWeekLabel = hasValidWeekRange ? `Weeks ${currentWeekFrom}-${currentWeekTo}` : "Selected weeks"
 
   const loadContributors = useCallback(async (showLoader: boolean) => {
     if (showLoader) {
@@ -188,11 +186,7 @@ export default function DashboardResourcesPage() {
         throw new Error(payload.error || "Failed to load contributors")
       }
 
-      setContributors(
-        (Array.isArray(payload.contributors) ? (payload.contributors as Contributor[]) : [])
-          .sort((a, b) => b.xp - a.xp)
-          .map((c, i) => ({ ...c, rank: i + 1 })),
-      )
+      setContributors(Array.isArray(payload.contributors) ? payload.contributors : [])
     } catch (error: unknown) {
       setContributorsError(error instanceof Error ? error.message : "Failed to load contributors")
       setContributors([])
@@ -298,16 +292,6 @@ export default function DashboardResourcesPage() {
     loadContributors(true)
   }, [loadContributors])
 
-  // Start the name field with the signed-in name.
-  useEffect(() => {
-    if (!showAddNotesDialog || formData.contributorName) return
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = (data.user?.user_metadata ?? {}) as Record<string, unknown>
-      const name = typeof meta.full_name === "string" ? meta.full_name : typeof meta.name === "string" ? meta.name : ""
-      if (name) setFormData((prev) => (prev.contributorName ? prev : { ...prev, contributorName: name }))
-    })
-  }, [showAddNotesDialog, formData.contributorName, supabase])
-
   const resetAddNotesForm = () => {
     setFormData(initialForm)
     setAddStep(1)
@@ -340,20 +324,15 @@ export default function DashboardResourcesPage() {
 
     if (addStep === 2) {
       const start = Number(formData.notesWeekFrom)
-      const end = formData.notesWeekTo.trim() === "" ? start : Number(formData.notesWeekTo)
+      const end = Number(formData.notesWeekTo)
 
-      if (formData.kind === "weeks" && (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start || end > 52)) {
-        setFormError("Enter a week, or a range where the second week is not before the first.")
+      if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start || end > 52) {
+        setFormError("Please enter a valid week range.")
         return false
       }
 
-      if (formData.kind === "other" && !formData.label.trim()) {
-        setFormError("Tell us what these notes cover.")
-        return false
-      }
-
-      if (!formData.anonymous && !formData.contributorName.trim()) {
-        setFormError("Enter your name, or choose to post anonymously.")
+      if (!formData.contributorName.trim()) {
+        setFormError("Please enter your name.")
         return false
       }
     }
@@ -380,11 +359,6 @@ export default function DashboardResourcesPage() {
   const handleBack = () => {
     setFormError(null)
     setAddStep((step) => Math.max(step - 1, 1))
-  }
-
-  const handleDownload = (note: ResourceNote) => {
-    setNotes((current) => current.map((n) => (n.id === note.id ? { ...n, downloads: (n.downloads ?? 0) + 1 } : n)))
-    fetch(`/api/resources/notes/${note.id}/download`, { method: "POST", keepalive: true }).catch(() => {})
   }
 
   const handleToggleStar = async (noteId: string) => {
@@ -414,10 +388,10 @@ export default function DashboardResourcesPage() {
         current.map((note) =>
           note.id === noteId
             ? {
-                ...note,
-                user_starred: nextStarred,
-                stars: nextStars,
-              }
+              ...note,
+              user_starred: nextStarred,
+              stars: nextStars,
+            }
             : note
         )
       )
@@ -450,10 +424,8 @@ export default function DashboardResourcesPage() {
           level: selectedLevel,
           subject: selectedSubject,
           notesWeekFrom: Number(formData.notesWeekFrom),
-          notesWeekTo: formData.notesWeekTo.trim() === "" ? Number(formData.notesWeekFrom) : Number(formData.notesWeekTo),
-          kind: formData.kind,
-          label: formData.label,
-          contributorName: formData.anonymous ? "Anonymous" : formData.contributorName,
+          notesWeekTo: Number(formData.notesWeekTo),
+          contributorName: formData.contributorName,
           driveLink: formData.driveLink,
         }),
       })
@@ -487,118 +459,239 @@ export default function DashboardResourcesPage() {
   const dialogHead = "border-b bg-muted/40 p-5 text-left"
 
   return (
-    <div className="space-y-5">
-      <div id="tour-resources">
-        <PageHeader
-          title="Resources"
-          description="Notes shared by students. Pick a level and subject, then download."
-          actions={
-            <button onClick={handleOpenAddNotes} disabled={isLoading} className={btnPrimary}>
-              <Plus className="size-4" /> Add notes
-            </button>
-          }
-        />
-      </div>
-
-      <div className="grid gap-3 rounded-2xl border bg-card p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1.4fr_1.2fr]">
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">Degree</span>
-          <Dropdown variant="dashboard" value={selectedDegree} onChange={(v) => setSelectedDegree(v as DegreeValue)} options={degreeValues.map((d) => ({ value: d, label: degreeLabels[d] }))} />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">Level</span>
-          <Dropdown variant="dashboard" value={selectedLevel} onChange={(v) => setSelectedLevel(v as LevelValue)} options={(Object.keys(levelLabels) as LevelValue[]).map((l) => ({ value: l, label: levelLabels[l] }))} />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">Subject</span>
-          <Dropdown variant="dashboard" value={selectedSubject} onChange={(v) => setSelectedSubject(v)} options={subjectsForSelection.map((s) => ({ value: s, label: s }))} disabled={subjectsForSelection.length === 0} />
-        </label>
+    <div className="space-y-6">
+      <div id="tour-resources" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">Search</span>
-          <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Name or weeks" className="w-full" />
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-foreground">
+            Study Resources & Notes
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm font-semibold text-muted-foreground">
+            Community-contributed lecture notes, verified study links, and leaderboards.
+          </p>
         </div>
+        <button onClick={handleOpenAddNotes} disabled={isLoading} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0a192f] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#112a52] transition-all shrink-0">
+          <Plus className="size-4" /> Submit Notes
+        </button>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_21rem]">
-        <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-card">
-          <div className="flex items-center justify-between border-b px-5 py-3">
-            <h2 className="text-sm font-bold">{selectedSubject || "Notes"}</h2>
-            <p className="text-xs text-muted-foreground">{notesLoading ? "Loading" : `${filteredNotes.length} ${filteredNotes.length === 1 ? "note" : "notes"}`}</p>
+      {/* Filter and Content Layout */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_20rem] items-start">
+        {/* Main Notes Area */}
+        <div className="space-y-4 min-w-0">
+          {/* Top Filter Bar: Program tabs + Level tabs + Search */}
+          <div className="flex flex-col gap-3 p-3 bg-card border border-black/5 rounded-2xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              {/* Degree Selector */}
+              <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-black/5">
+                {degreeValues.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setSelectedDegree(d)}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all",
+                      selectedDegree === d
+                        ? "bg-[#0a192f] text-white shadow-sm"
+                        : "text-muted-foreground hover:bg-black/5 hover:text-foreground"
+                    )}
+                  >
+                    {degreeLabels[d]}
+                  </button>
+                ))}
+              </div>
+
+              {/* Live search input */}
+              <SearchBox value={searchQuery} onChange={setSearchQuery} placeholder="Search title or contributor..." className="w-full sm:w-64" />
+            </div>
+
+            {/* Level Selector */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-black/5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(Object.keys(levelLabels) as LevelValue[]).map((l) => (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => setSelectedLevel(l)}
+                    className={cn(
+                      "rounded-full px-3.5 py-1 text-xs font-bold uppercase tracking-wider transition-all",
+                      selectedLevel === l
+                        ? "bg-[#0a192f]/10 text-[#0a192f] ring-1 ring-[#0a192f]/30 font-black"
+                        : "bg-muted/30 text-muted-foreground hover:bg-black/5 hover:text-foreground"
+                    )}
+                  >
+                    {levelLabels[l]}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                {filteredNotes.length} notes available
+              </span>
+            </div>
           </div>
-          <div className="h-[calc(100vh-24rem)] min-h-[22rem] overflow-y-auto p-4">
-            {notesLoading && <SkCards count={6} image={false} cols="sm:grid-cols-2 2xl:grid-cols-3" />}
+
+          {/* Subject Selector Bar */}
+          <div className="flex flex-wrap gap-1.5 p-1.5 bg-card border border-black/5 rounded-2xl shadow-sm">
+            {subjectsForSelection.map((subject) => (
+              <button
+                key={subject}
+                type="button"
+                onClick={() => setSelectedSubject(subject)}
+                className={cn(
+                  "rounded-xl px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all",
+                  selectedSubject === subject
+                    ? "bg-[#0a192f] text-white shadow-sm"
+                    : "bg-muted/40 text-black/70 hover:bg-black/5 hover:text-black"
+                )}
+              >
+                {subject}
+              </button>
+            ))}
+          </div>
+
+          {/* Notes Cards Grid */}
+          <section className="min-w-0 pt-1">
+            {notesLoading && (
+              <SkCards count={4} image={false} cols="sm:grid-cols-2" />
+            )}
             {!notesLoading && notesError && <Notice tone="error">{notesError}</Notice>}
             {!notesLoading && !notesError && filteredNotes.length === 0 && (
-              <EmptyState icon={Library} title="No notes yet" hint="Nobody has shared notes for this subject. Be the first to add some." />
+              <EmptyState icon={Library} title="No approved notes yet" hint="Nothing has been approved for this subject. Be the first to add some." />
             )}
             {!notesLoading && !notesError && filteredNotes.length > 0 && (
-              <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredNotes.map((note) => (
-                  <li key={note.id} className="flex flex-col gap-3 rounded-xl border p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="flex min-w-0 items-center gap-2 text-sm font-semibold">
-                        <Avatar name={note.contributor_name} src={note.contributor_avatar} size={26} />
-                        <span className="truncate">{note.contributor_name}</span>
+                  <li
+                    key={note.id}
+                    className="group relative flex flex-col justify-between rounded-2xl border bg-card p-3.5 shadow-sm ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#0a192f]/40"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1.5">
+                        <span className="rounded-full bg-[#0a192f]/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#0a192f]">
+                          {note.notes_content_label}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleStar(note.id)}
+                          disabled={starringNoteId === note.id}
+                          aria-pressed={note.user_starred}
+                          className={cn(
+                            "inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-black transition-all",
+                            note.user_starred
+                              ? "border-[#0a192f] bg-[#0a192f] text-white"
+                              : "border-black/10 bg-white hover:bg-black/5 text-foreground"
+                          )}
+                        >
+                          <Star className={cn("size-2.5", note.user_starred && "fill-current text-white")} />
+                          {note.stars}
+                        </button>
+                      </div>
+
+                      <h3 className="mt-2 line-clamp-2 text-xs font-black uppercase tracking-tight text-foreground leading-snug">
+                        {note.title}
+                      </h3>
+                      <p className="mt-1 text-[10px] font-bold text-muted-foreground">
+                        Weeks {note.notes_week_from}–{note.notes_week_to}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => void handleToggleStar(note.id)}
-                        disabled={starringNoteId === note.id}
-                        aria-pressed={note.user_starred}
-                        aria-label="Star these notes"
-                        className={cn("inline-flex h-7 items-center gap-1 rounded-lg px-2 text-xs font-semibold transition-colors disabled:opacity-50", note.user_starred ? "bg-chart-2/15 text-chart-2" : "text-muted-foreground hover:bg-muted")}
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2">
+                      <p className="flex min-w-0 items-center gap-1 text-[11px] font-bold text-muted-foreground">
+                        <Avatar name={note.contributor_name} size={18} />
+                        <span className="truncate max-w-[80px]">{note.contributor_name}</span>
+                      </p>
+                      <a
+                        href={note.drive_link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full bg-[#0a192f] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white transition-all hover:bg-[#112a52] hover:shadow-sm"
                       >
-                        <Star className={cn("size-3.5", note.user_starred && "fill-current")} /> {note.stars}
-                      </button>
-                    </div>
-                    <div className="rounded-lg bg-muted/60 px-3 py-2">
-                      <p className="text-[11px] font-medium text-muted-foreground">Covers</p>
-                      <p className="text-sm font-bold">{note.notes_content_label.replace(/(\d+)\s*-\s*\1\b/, "$1").replace(/(\d)\s*-\s*(\d)/, "$1–$2")}</p>
-                    </div>
-                    <div className="mt-auto flex items-center justify-between gap-3">
-                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold tabular-nums text-muted-foreground">
-                        <Download className="size-3.5" /> {(note.downloads ?? 0).toLocaleString("en-IN")}
-                      </p>
-                      <a href={note.drive_link} target="_blank" rel="noreferrer" onClick={() => handleDownload(note)} className={cn(btnPrimary, "h-9 px-4")}>
-                        Download
+                        <ExternalLink className="size-2.5" /> Drive
                       </a>
                     </div>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
-        </section>
+          </section>
+        </div>
 
-        <aside className="flex h-fit flex-col overflow-hidden rounded-2xl border bg-card xl:h-[calc(100vh-24rem)] xl:min-h-[26rem]">
-          <div className="flex items-center justify-between gap-2 border-b px-5 py-3">
-            <h2 className="text-sm font-bold">Top contributors</h2>
-            <button type="button" onClick={() => setShowXpGuide(true)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground">
-              <CircleHelp className="size-3.5" /> How XP works
+        {/* Sidebar: Contributors & Leaderboard */}
+        <aside className="rounded-2xl border bg-card p-4 shadow-sm ring-1 ring-black/5 lg:sticky lg:top-6 space-y-3">
+          <div className="flex items-center justify-between gap-2 border-b border-black/5 pb-3">
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="inline-block size-2 rounded-full bg-emerald-500 animate-pulse" />
+                <h2 className="text-sm font-black uppercase tracking-tight text-foreground">Leaderboard</h2>
+              </div>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">Top Note Contributors</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowXpGuide(true)}
+              className="inline-flex items-center gap-1 rounded-full bg-[#0a192f] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white hover:bg-[#112a52] transition-colors"
+            >
+              XP Guide
             </button>
           </div>
-          {contributorsLoading && <div className="m-5 h-24 animate-pulse rounded-xl bg-muted" />}
-          {!contributorsLoading && contributorsError && <div className="p-5"><Notice tone="error">{contributorsError}</Notice></div>}
+
+          {contributorsLoading && <div className="h-40 animate-pulse rounded-xl bg-muted/40" />}
+          {!contributorsLoading && contributorsError && <Notice tone="error">{contributorsError}</Notice>}
           {!contributorsLoading && !contributorsError && contributors.length === 0 && (
-            <p className="px-5 py-8 text-center text-sm text-muted-foreground">No contributors here yet.</p>
+            <p className="py-8 text-center text-xs font-bold text-muted-foreground">No contributors for this filter yet.</p>
           )}
           {!contributorsLoading && !contributorsError && contributors.length > 0 && (
-            <ol className="max-h-[30rem] min-h-0 flex-1 divide-y overflow-y-auto xl:max-h-none">
-              {contributors.map((c) => (
-                <li key={`${c.userId}-${c.rank}`} className="flex items-center gap-3 px-5 py-2.5">
-                  <span className={cn("w-5 text-sm tabular-nums", c.rank <= 3 ? "font-extrabold" : "font-medium text-muted-foreground")}>{c.rank}</span>
-                  <Avatar name={c.name} src={c.avatarUrl} size={30} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">{c.name}</span>
-                    <span className="block text-xs text-muted-foreground">{c.notesCount} {c.notesCount === 1 ? "note" : "notes"}</span>
-                  </span>
-                  <span className="text-sm font-bold tabular-nums">{c.xp.toLocaleString("en-IN")}<span className="ml-0.5 text-xs font-medium text-muted-foreground"> XP</span></span>
-                </li>
-              ))}
+            <ol className="max-h-[32rem] space-y-1.5 overflow-y-auto pr-1">
+              {contributors.map((c) => {
+                const isTop3 = c.rank <= 3
+                return (
+                  <li
+                    key={`${c.userId}-${c.rank}`}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-xl p-2.5 transition-all border",
+                      isTop3
+                        ? "bg-[#0a192f]/[0.02] border-[#0a192f]/10 shadow-xs"
+                        : "bg-white border-black/5"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-lg text-xs font-black",
+                        c.rank === 1 && "bg-amber-100 text-amber-800 ring-1 ring-amber-300",
+                        c.rank === 2 && "bg-slate-100 text-slate-800 ring-1 ring-slate-300",
+                        c.rank === 3 && "bg-orange-100 text-orange-800 ring-1 ring-orange-300",
+                        c.rank > 3 && "text-muted-foreground bg-black/5"
+                      )}
+                    >
+                      {c.rank}
+                    </span>
+
+                    <Avatar name={c.name} src={c.avatarUrl} size={32} />
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-black uppercase tracking-tight text-foreground">{c.name}</p>
+                      <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground mt-0.5">
+                        <span className="font-bold">{c.notesCount} {c.notesCount === 1 ? "note" : "notes"}</span>
+                        <span>•</span>
+                        <span className="inline-flex items-center gap-0.5 font-bold text-amber-600">
+                          <Star className="size-2.5 fill-amber-400 text-amber-400" /> {c.stars}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="inline-block rounded-lg bg-[#0a192f] px-2.5 py-1 text-xs font-black uppercase tracking-wider text-white shadow-xs">
+                        {c.xp} XP
+                      </span>
+                    </div>
+                  </li>
+                )
+              })}
             </ol>
           )}
         </aside>
       </div>
+
+      <DashboardCuratedResources />
 
       <Dialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
         <DialogContent className={dialogCls}>
@@ -659,7 +752,11 @@ export default function DashboardResourcesPage() {
             {addStep === 1 && (
               <div className="space-y-4">
                 <Field label="Degree">
-                  <Dropdown variant="dashboard" value={selectedDegree} onChange={(v) => setSelectedDegree(v as DegreeValue)} options={degreeValues.map((d) => ({ value: d, label: degreeLabels[d] }))} />
+                  <select value={selectedDegree} onChange={(e) => setSelectedDegree(e.target.value as DegreeValue)} className={field}>
+                    {degreeValues.map((degree) => (
+                      <option key={degree} value={degree}>{degreeLabels[degree]}</option>
+                    ))}
+                  </select>
                 </Field>
                 <Field label="Level">
                   <Segmented
@@ -670,42 +767,28 @@ export default function DashboardResourcesPage() {
                   />
                 </Field>
                 <Field label="Subject">
-                  <Dropdown variant="dashboard" value={selectedSubject} onChange={(v) => setSelectedSubject(v)} options={subjectsForSelection.map((s) => ({ value: s, label: s }))} disabled={subjectsForSelection.length === 0} />
+                  <select value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)} className={field}>
+                    {subjectsForSelection.map((subject) => (
+                      <option key={subject} value={subject}>{subject}</option>
+                    ))}
+                  </select>
                 </Field>
               </div>
             )}
 
             {addStep === 2 && (
               <div className="space-y-4">
-                <Field label="What do these notes cover?">
-                  <Segmented
-                    options={(Object.keys(kindLabels) as NoteKind[]).map((k) => ({ id: k, label: kindLabels[k] }))}
-                    value={formData.kind}
-                    onChange={(k) => setFormData((prev) => ({ ...prev, kind: k }))}
-                    className="w-full [&_button]:flex-1"
-                  />
-                </Field>
-                {formData.kind === "weeks" ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="From week">
-                      <input type="number" min={1} max={52} value={formData.notesWeekFrom} onChange={(e) => setFormData((prev) => ({ ...prev, notesWeekFrom: e.target.value }))} className={field} />
-                    </Field>
-                    <Field label="To week (optional)">
-                      <input type="number" min={1} max={52} value={formData.notesWeekTo} onChange={(e) => setFormData((prev) => ({ ...prev, notesWeekTo: e.target.value }))} className={field} placeholder="Same week" />
-                    </Field>
-                  </div>
-                ) : (
-                  <Field label={formData.kind === "other" ? "Name these notes" : formData.kind === "book" ? "Book number (optional)" : "Note (optional)"}>
-                    <input value={formData.label} onChange={(e) => setFormData((prev) => ({ ...prev, label: e.target.value }))} className={field} placeholder={formData.kind === "other" ? "e.g. Formula sheet" : formData.kind === "book" ? "e.g. 2" : "e.g. Quiz 1 summary"} maxLength={60} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Notes from week">
+                    <input type="number" min={1} max={52} value={formData.notesWeekFrom} onChange={(e) => setFormData((prev) => ({ ...prev, notesWeekFrom: e.target.value }))} className={field} placeholder="From" />
                   </Field>
-                )}
+                  <Field label="To week">
+                    <input type="number" min={1} max={52} value={formData.notesWeekTo} onChange={(e) => setFormData((prev) => ({ ...prev, notesWeekTo: e.target.value }))} className={field} placeholder="To" />
+                  </Field>
+                </div>
                 <Field label="Your name" htmlFor="name">
-                  <input id="name" value={formData.anonymous ? "Anonymous" : formData.contributorName} disabled={formData.anonymous} onChange={(e) => setFormData((prev) => ({ ...prev, contributorName: e.target.value }))} className={field} placeholder="Enter your name" />
+                  <input id="name" value={formData.contributorName} onChange={(e) => setFormData((prev) => ({ ...prev, contributorName: e.target.value }))} className={field} placeholder="Enter your name" />
                 </Field>
-                <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-                  <input type="checkbox" checked={formData.anonymous} onChange={(e) => setFormData((prev) => ({ ...prev, anonymous: e.target.checked }))} className="size-4 accent-primary" />
-                  Post anonymously
-                </label>
               </div>
             )}
 
