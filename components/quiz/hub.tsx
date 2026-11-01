@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { Card, EmptyState, Field, Notice, PageHeader, btnGhost, btnPrimary, field } from "@/components/dashboard/ui"
 import { Banner, Tile } from "./banner"
 import { Illustration } from "./illustration"
+import { TopicBreakdownCard } from "./topic-breakdown-card"
 import { iconFor } from "@/lib/quiz/tone"
 import { Modal, SearchBox, Segmented, Tabs } from "@/components/dashboard/controls"
 import {
@@ -77,12 +78,12 @@ function Back({ href, children }: { href: string; children: React.ReactNode }) {
   )
 }
 
-const HOME_CARDS: { href: string; title: string; hint: string; icon: React.ElementType }[] = [
-  { href: "practice", title: "Practice", hint: "Quick and custom tests from past questions", icon: Zap },
-  { href: "quiz1", title: "Quiz 1", hint: KIND_HINT.quiz1, icon: FileText },
-  { href: "quiz2", title: "Quiz 2", hint: KIND_HINT.quiz2, icon: ListChecks },
-  { href: "endterm", title: "End term", hint: KIND_HINT.endterm, icon: GraduationCap },
-  { href: "oppe", title: "OPPE", hint: "Coding problems by course", icon: Code2 },
+const HOME_CARDS: { href: string; title: string; hint: string; icon: React.ElementType; badge?: string }[] = [
+  { href: "practice", title: "Practice", hint: "Quick & custom tests from past questions", icon: Zap, badge: "Flexible" },
+  { href: "quiz1", title: "Quiz 1", hint: KIND_HINT.quiz1, icon: FileText, badge: "Exam" },
+  { href: "quiz2", title: "Quiz 2", hint: KIND_HINT.quiz2, icon: ListChecks, badge: "Exam" },
+  { href: "endterm", title: "End term", hint: KIND_HINT.endterm, icon: GraduationCap, badge: "Exam" },
+  { href: "oppe", title: "OPPE", hint: "Coding problems by course", icon: Code2, badge: "Lab" },
 ]
 
 /** Step 1: choose the exam. Also holds the resume banner and history. */
@@ -155,15 +156,31 @@ export function QuizHome() {
       {tab === "history" ? (
         <HistoryList entries={history} onRetry={(e) => launcher.launch({ mode: "retry", items: e.missed, minutes: null })} onClear={() => { clearHistory(); setHistory([]) }} busy={launcher.busy} error={launcher.error} />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {HOME_CARDS.map((c) => (
-            <Link key={c.href} href={`${BASE}/${c.href}`} className="group rounded-2xl border bg-card p-5 transition-colors hover:border-foreground/30">
-              <div className="flex items-start justify-between">
-                <Tile icon={c.icon} />
-                <ArrowUpRight className="size-5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            <Link
+              key={c.href}
+              href={`${BASE}/${c.href}`}
+              className="group relative flex flex-col justify-between rounded-xl border border-black/10 bg-card p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-[#0a192f] hover:shadow-sm"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-[#0a192f]/5 text-[#0a192f] transition-colors group-hover:bg-[#0a192f] group-hover:text-white">
+                    <c.icon className="size-4" />
+                  </div>
+                  {c.badge && (
+                    <span className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:bg-[#0a192f]/10 group-hover:text-[#0a192f]">
+                      {c.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-3 text-base font-bold tracking-tight text-foreground">{c.title}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground leading-relaxed">{c.hint}</p>
               </div>
-              <p className="mt-5 text-xl font-extrabold tracking-tight">{c.title}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{c.hint}</p>
+              <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2 text-[11px] font-semibold text-muted-foreground group-hover:text-[#0a192f]">
+                <span>Start</span>
+                <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </div>
             </Link>
           ))}
         </div>
@@ -191,50 +208,106 @@ function useSubjects() {
 export function CoursePicker({ kind }: { kind: ExamKind | "practice" }) {
   const { subjects, available, error } = useSubjects()
   const [query, setQuery] = useState("")
+  const [levelFilter, setLevelFilter] = useState<"All" | Level>("All")
 
-  const groups = useMemo(() => {
+  const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const hits = (subjects ?? []).filter((s) => !q || s.name.toLowerCase().includes(q))
-    return (["Foundation", "Diploma", "Degree"] as Level[]).map((level) => ({ level, items: hits.filter((s) => s.level === level) })).filter((g) => g.items.length)
-  }, [subjects, query])
+    return (subjects ?? []).filter((s) => {
+      const matchQ = !q || s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q)
+      const matchLevel = levelFilter === "All" || s.level === levelFilter
+      return matchQ && matchLevel
+    })
+  }, [subjects, query, levelFilter])
+
+  const counts = useMemo(() => {
+    const all = subjects ?? []
+    return {
+      All: all.length,
+      Foundation: all.filter((s) => s.level === "Foundation").length,
+      Diploma: all.filter((s) => s.level === "Diploma").length,
+      Degree: all.filter((s) => s.level === "Degree").length,
+    }
+  }, [subjects])
 
   return (
     <div className="space-y-6">
       <Back href={BASE}>Quiz prep</Back>
       <Banner
         title={kind === "practice" ? "Practice" : KIND_LABEL[kind]}
-        description="Choose a course."
+        description="Choose a course to begin."
         art={kind === "practice" ? "practice" : "quiz-home"}
       />
 
       {error ? (
         <Notice tone="error">{error}</Notice>
       ) : !subjects ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="h-[4.5rem] animate-pulse rounded-2xl border bg-muted/50" />
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl border border-black/5 bg-muted/40" />
           ))}
         </div>
       ) : !available ? (
         <EmptyState icon={BookOpen} title="Question papers are being set up" hint="The past paper library is not available on this server yet. Check back soon." />
       ) : (
         <>
-          <SearchBox value={query} onChange={setQuery} placeholder="Search courses" className="w-full sm:max-w-sm" />
-          {groups.map((g) => (
-            <section key={g.level} className="space-y-3">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{g.level}</h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {g.items.map((s) => (
-                  <Link key={s.id} href={`${BASE}/${kind}/${s.id}`} className="group flex items-center gap-3 rounded-2xl border bg-card p-3.5 transition-colors hover:border-foreground/30">
-                    <Tile icon={iconFor(s.id)} />
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold">{s.name}</span>
-                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-          {groups.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">No course matches that search.</p>}
+          {/* Compact Filter Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-black/5 bg-card p-2.5 shadow-sm">
+            <div className="flex flex-wrap items-center gap-1">
+              {(["All", "Foundation", "Diploma", "Degree"] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setLevelFilter(lvl)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
+                    levelFilter === lvl
+                      ? "bg-[#0a192f] text-white shadow-sm"
+                      : "text-muted-foreground hover:bg-black/5 hover:text-foreground"
+                  )}
+                >
+                  <span>{lvl}</span>
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 py-0.2 text-[10px]",
+                      levelFilter === lvl ? "bg-white/20 text-white" : "bg-black/5 text-muted-foreground"
+                    )}
+                  >
+                    {counts[lvl]}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <SearchBox value={query} onChange={setQuery} placeholder="Search courses..." className="w-full sm:w-64" />
+          </div>
+
+          {/* Compact Course Grid (4-column on desktop) */}
+          <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((s) => {
+              const Icon = iconFor(s.id)
+              return (
+                <Link
+                  key={s.id}
+                  href={`${BASE}/${kind}/${s.id}`}
+                  className="group relative flex items-center gap-2.5 rounded-xl border border-black/10 bg-card p-3 shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#0a192f] hover:shadow-sm"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#0a192f]/5 text-[#0a192f] transition-colors group-hover:bg-[#0a192f] group-hover:text-white">
+                    <Icon className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-bold text-foreground group-hover:text-[#0a192f]">{s.name}</p>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{s.level}</span>
+                  </div>
+                  <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#0a192f]" />
+                </Link>
+              )
+            })}
+          </div>
+
+          {filtered.length === 0 && (
+            <p className="py-10 text-center text-xs font-semibold text-muted-foreground">
+              No courses match your filter or search query.
+            </p>
+          )}
         </>
       )}
     </div>
@@ -271,6 +344,7 @@ export function PaperPicker({ kind, subjectId }: { kind: ExamKind | "practice"; 
         <EmptyState icon={BookOpen} title="Course not found" hint="Go back and pick a course from the list." />
       ) : (
         <>
+          <TopicBreakdownCard subjectId={subjectId} />
           {kind === "practice" ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {[
@@ -299,6 +373,7 @@ export function PaperPicker({ kind, subjectId }: { kind: ExamKind | "practice"; 
 function MockList({ subject, kind }: { subject: SubjectInfo; kind: ExamKind }) {
   const [papers, setPapers] = useState<PaperInfo[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [query, setQuery] = useState("")
 
   useEffect(() => {
     fetchPapers(subject.id)
@@ -306,7 +381,15 @@ function MockList({ subject, kind }: { subject: SubjectInfo; kind: ExamKind }) {
       .catch((e) => setError(e instanceof Error ? e.message : "Could not load papers"))
   }, [subject.id])
 
-  const list = useMemo(() => (papers ?? []).filter((p) => p.kind === kind), [papers, kind])
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return (papers ?? []).filter((p) => {
+      const matchKind = p.kind === kind
+      const matchQ = !q || p.dateLabel.toLowerCase().includes(q) || (p.set && `set ${p.set}`.includes(q))
+      return matchKind && matchQ
+    })
+  }, [papers, kind, query])
+
   // The set code is only shown when two papers share a date, so students can tell them apart.
   const crowded = useMemo(() => {
     const seen = new Map<string, number>()
@@ -316,27 +399,62 @@ function MockList({ subject, kind }: { subject: SubjectInfo; kind: ExamKind }) {
 
   if (error) return <Notice tone="error">{error}</Notice>
   if (!papers) return <div className="h-32 animate-pulse rounded-2xl bg-muted/50" />
-  if (list.length === 0) return <EmptyState icon={BookOpen} title={`No ${KIND_LABEL[kind]} papers for this course yet`} hint="Go back and try another exam, or take a quick test drawn from every paper." />
+  if (papers.filter((p) => p.kind === kind).length === 0) {
+    return <EmptyState icon={BookOpen} title={`No ${KIND_LABEL[kind]} papers for this course yet`} hint="Go back and try another exam, or take a quick test drawn from every paper." />
+  }
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {list.map((p) => {
-        const extra = [(crowded.get(p.dateLabel) ?? 0) > 1 && p.set ? `Set ${p.set}` : null, p.variant].filter(Boolean).join(" · ")
-        return (
-          <Link
-            key={p.id}
-            href={`${BASE}/${kind}/${subject.id}/instructions?paper=${encodeURIComponent(p.id)}`}
-            className="group rounded-2xl border bg-card p-5 transition-colors hover:border-foreground/30"
-          >
-            <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{KIND_LABEL[kind]}{extra ? ` · ${extra}` : ""}</p>
-            <p className="mt-1 text-2xl font-extrabold tracking-tight">{p.dateLabel}</p>
-            <div className="mt-3 flex gap-2 text-xs font-semibold">
-              <span className="rounded-lg bg-muted px-2.5 py-1">{p.questions} questions</span>
-              <span className="rounded-lg bg-muted px-2.5 py-1">{p.marks} marks</span>
-            </div>
-          </Link>
-        )
-      })}
+    <div className="space-y-4">
+      {/* Search & Paper count filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-black/5 bg-card p-2.5 shadow-sm">
+        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-2">
+          {list.length} {list.length === 1 ? "paper" : "papers"} available
+        </span>
+        <SearchBox value={query} onChange={setQuery} placeholder="Filter by term or year (e.g. 2023)..." className="w-full sm:w-64" />
+      </div>
+
+      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {list.map((p) => {
+          const extra = [(crowded.get(p.dateLabel) ?? 0) > 1 && p.set ? `Set ${p.set}` : null, p.variant].filter(Boolean).join(" · ")
+          return (
+            <Link
+              key={p.id}
+              href={`${BASE}/${kind}/${subject.id}/instructions?paper=${encodeURIComponent(p.id)}`}
+              className="group relative flex flex-col justify-between rounded-xl border border-black/10 bg-card p-3.5 shadow-xs transition-all duration-150 hover:-translate-y-0.5 hover:border-[#0a192f] hover:shadow-sm"
+            >
+              <div>
+                <div className="flex items-center justify-between gap-1.5">
+                  <span className="rounded-full bg-[#0a192f]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#0a192f]">
+                    {KIND_LABEL[kind]}
+                  </span>
+                  {extra && (
+                    <span className="text-[10px] font-semibold text-muted-foreground">
+                      {extra}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-base font-extrabold tracking-tight text-foreground group-hover:text-[#0a192f]">{p.dateLabel}</p>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between border-t border-black/5 pt-2 text-[11px] font-semibold text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="rounded-md bg-black/5 px-1.5 py-0.5 text-[10px]">{p.questions} Qs</span>
+                  <span className="rounded-md bg-black/5 px-1.5 py-0.5 text-[10px]">{p.marks} M</span>
+                </span>
+                <span className="inline-flex items-center gap-0.5 font-bold text-[#0a192f]">
+                  Open <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </span>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+
+      {list.length === 0 && (
+        <p className="py-8 text-center text-xs font-semibold text-muted-foreground">
+          No papers match your search.
+        </p>
+      )}
     </div>
   )
 }
@@ -410,14 +528,23 @@ export function Instructions({ kind, subjectId, paperId, mode }: { kind: ExamKin
               {mode === "quick" && <QuickForm subject={subject} launcher={launcher} disabled={!agreed} />}
               {mode === "custom" && <CustomForm subject={subject} launcher={launcher} disabled={!agreed} />}
 
-              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-sm">
-                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 size-4 accent-primary" />
-                <span>I have read the instructions.</span>
+              <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-sm select-none">
+                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 size-4 rounded accent-[#0a192f]" />
+                <span className="font-semibold text-foreground">I have read the instructions.</span>
               </label>
               {launcher.error && <Notice tone="error" className="mt-4">{launcher.error}</Notice>}
               {mode === "mock" && paper && (
-                <button className={cn(btnPrimary, "mt-4 w-full")} disabled={!agreed || launcher.busy} onClick={() => launcher.launch({ mode: "mock", paperId: paper.id, minutes })}>
-                  <Play className="size-4" /> {launcher.busy ? "Preparing" : "Begin test"}
+                <button
+                  className={cn(
+                    "mt-4 w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold uppercase tracking-wider text-white transition-all shadow-sm",
+                    agreed && !launcher.busy
+                      ? "bg-[#0a192f] hover:bg-[#112a52]"
+                      : "bg-black/30 cursor-not-allowed opacity-60"
+                  )}
+                  disabled={!agreed || launcher.busy}
+                  onClick={() => launcher.launch({ mode: "mock", paperId: paper.id, minutes })}
+                >
+                  <Play className="size-4" /> {launcher.busy ? "Preparing..." : "Begin test"}
                 </button>
               )}
             </Card>
@@ -454,10 +581,17 @@ function QuickForm({ subject, launcher, disabled }: { subject: SubjectInfo; laun
   return (
     <div className="space-y-4">
       <Field label="Questions" hint={`Random questions from all past papers, about ${Math.ceil(count * 1.5)} minutes.`}>
-        <Segmented value={String(count)} onChange={(v) => setCount(Number(v))} options={["5", "10", "20"].map((n) => ({ id: n, label: n }))} />
+        <Segmented value={String(count)} onChange={(v) => setCount(Number(v))} options={["5", "10", "20"].map((n) => ({ id: n, label: n }))} className="w-full flex" />
       </Field>
-      <button className={cn(btnPrimary, "w-full")} disabled={disabled || launcher.busy} onClick={() => launcher.launch({ mode: "quick", subjectId: subject.id, count, kinds: [] })}>
-        <Play className="size-4" /> {launcher.busy ? "Preparing" : "Begin test"}
+      <button
+        className={cn(
+          "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold uppercase tracking-wider text-white transition-all shadow-sm",
+          !disabled && !launcher.busy ? "bg-[#0a192f] hover:bg-[#112a52]" : "bg-black/30 cursor-not-allowed opacity-60"
+        )}
+        disabled={disabled || launcher.busy}
+        onClick={() => launcher.launch({ mode: "quick", subjectId: subject.id, count, kinds: [] })}
+      >
+        <Play className="size-4" /> {launcher.busy ? "Preparing..." : "Begin test"}
       </button>
     </div>
   )
@@ -470,22 +604,26 @@ function CustomForm({ subject, launcher, disabled }: { subject: SubjectInfo; lau
   return (
     <div className="space-y-4">
       <Field label="Questions">
-        <Segmented value={String(count)} onChange={(v) => setCount(Number(v))} options={["10", "20", "30", "40"].map((n) => ({ id: n, label: n }))} />
+        <Segmented value={String(count)} onChange={(v) => setCount(Number(v))} options={["10", "20", "30", "40"].map((n) => ({ id: n, label: n }))} className="w-full flex" />
       </Field>
       <Field label="Question type">
         <Segmented
           value={types[0] ?? "all"}
           onChange={(v) => setTypes(v === "all" ? [] : [v as QType])}
           options={[{ id: "all", label: "All" }, ...TYPES.map((t) => ({ id: t, label: TYPE_LABEL[t] }))]}
+          className="w-full flex"
         />
       </Field>
       <DurationPicker suggested={Math.ceil(count * 1.5)} value={timed ? 1 : null} onChange={(m) => setTimed(m !== null)} />
       <button
-        className={cn(btnPrimary, "w-full")}
+        className={cn(
+          "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold uppercase tracking-wider text-white transition-all shadow-sm",
+          !disabled && !launcher.busy ? "bg-[#0a192f] hover:bg-[#112a52]" : "bg-black/30 cursor-not-allowed opacity-60"
+        )}
         disabled={disabled || launcher.busy}
         onClick={() => launcher.launch({ mode: "custom", subjectId: subject.id, count, kinds: [], types, minutes: timed ? Math.max(5, Math.ceil(count * 1.5)) : null })}
       >
-        <Play className="size-4" /> {launcher.busy ? "Preparing" : "Begin test"}
+        <Play className="size-4" /> {launcher.busy ? "Preparing..." : "Begin test"}
       </button>
     </div>
   )

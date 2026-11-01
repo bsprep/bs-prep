@@ -33,7 +33,6 @@ export function QuestionCard({
   onChange,
   review,
   passageNote,
-  bare,
 }: {
   question: QuizQuestion
   number: number
@@ -41,8 +40,6 @@ export function QuestionCard({
   onChange?: (r: Response) => void
   review?: GradedItem
   passageNote?: string
-  /** Leave out the number and type line; the screen shows it elsewhere. */
-  bare?: boolean
 }) {
   const [zoom, setZoom] = useState<string | null>(null)
   const locked = !!review
@@ -57,7 +54,6 @@ export function QuestionCard({
 
   return (
     <div className="space-y-4">
-      {!bare && (
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-base font-extrabold">Question {number}</span>
         <Tag>{TYPE_LABEL[question.type]}</Tag>
@@ -66,7 +62,6 @@ export function QuestionCard({
         </Tag>
         {question.type === "MSQ" && !locked && <span className="text-xs text-muted-foreground">Select all that apply</span>}
       </div>
-      )}
 
       {question.passage && (
         <div className="rounded-xl border bg-muted/50 p-4">
@@ -101,7 +96,7 @@ export function QuestionCard({
           )}
         </div>
       ) : (
-        <ul className="space-y-2.5">
+        <ul className="space-y-2">
           {question.options.map((o, i) => {
             const picked = chosen.includes(o.id)
             const isRight = correct.has(o.id)
@@ -114,25 +109,26 @@ export function QuestionCard({
                   aria-pressed={picked}
                   disabled={locked}
                   className={cn(
-                    "flex w-full items-start gap-3 rounded-xl border-2 p-3.5 text-left transition-colors disabled:cursor-default",
-                    state === "idle" && "bg-card hover:bg-muted/60",
-                    state === "picked" && "border-primary bg-primary/5",
-                    state === "right" && "border-chart-4/60 bg-chart-4/10",
-                    state === "wrong" && "border-destructive/50 bg-destructive/10",
+                    "flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-all duration-150 disabled:cursor-default",
+                    state === "idle" && "border-black/10 bg-white hover:border-[#0a192f]/40 hover:bg-black/[0.02] shadow-2xs",
+                    state === "picked" && "border-[#0a192f] bg-[#0a192f]/5 shadow-xs ring-1 ring-[#0a192f]",
+                    state === "right" && "border-emerald-500 bg-emerald-50/70 shadow-xs",
+                    state === "wrong" && "border-rose-500 bg-rose-50/70 shadow-xs",
                   )}
                 >
                   <span
                     className={cn(
-                      "mt-0.5 grid size-6 shrink-0 place-items-center border text-xs font-bold",
+                      "mt-0.5 grid size-5 shrink-0 place-items-center border text-[11px] font-bold",
                       question.type === "MCQ" ? "rounded-full" : "rounded-md",
-                      state === "picked" && "border-primary bg-primary text-primary-foreground",
-                      state === "right" && "border-chart-4 bg-chart-4 text-white",
-                      state === "wrong" && "border-destructive bg-destructive text-white",
+                      state === "idle" && "border-black/20 bg-muted/50 text-foreground",
+                      state === "picked" && "border-[#0a192f] bg-[#0a192f] text-white",
+                      state === "right" && "border-emerald-600 bg-emerald-600 text-white",
+                      state === "wrong" && "border-rose-600 bg-rose-600 text-white",
                     )}
                   >
-                    {state === "right" ? <Check className="size-3.5" /> : state === "wrong" ? <X className="size-3.5" /> : String.fromCharCode(65 + i)}
+                    {state === "right" ? <Check className="size-3" /> : state === "wrong" ? <X className="size-3" /> : String.fromCharCode(65 + i)}
                   </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 flex-1 text-sm leading-relaxed">
                     {o.html && <Rich html={o.html} onZoom={setZoom} />}
                     {o.image && (
                       // eslint-disable-next-line @next/next/no-img-element
