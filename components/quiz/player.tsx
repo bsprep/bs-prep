@@ -3,14 +3,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Calculator, ChevronLeft, ChevronRight, Flag, Maximize2, Minimize2, X, ZoomIn, ZoomOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { btnGhost, btnPrimary, Notice, Tag } from "@/components/dashboard/ui"
+import { btnGhost, btnPrimary, Notice } from "@/components/dashboard/ui"
 import { Modal } from "@/components/dashboard/controls"
 import { TimerPill } from "./timer"
 import { ConfirmDialog } from "./confirm"
 import { QuestionCard } from "./question-card"
 import { Calculator as CalculatorPanel } from "./calculator"
 import { isAnswered, passageRanges, saveSession, type ActiveSession } from "@/lib/quiz/client"
-import { TYPE_LABEL, type Response } from "@/lib/quiz/types"
+import type { Response } from "@/lib/quiz/types"
+
+const clock = (sec: number) => {
+  const s = Math.max(0, sec)
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${pad(m)}:${pad(s % 60)}`
+}
 
 export function Player({
   initial,
@@ -31,18 +39,18 @@ export function Player({
   const [now, setNow] = useState(() => Date.now())
   const [confirm, setConfirm] = useState<"submit" | "exit" | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
-  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [palette, setPalette] = useState(false)
   const [calc, setCalc] = useState(false)
-  const [zoom, setZoomState] = useState(1.1)
+  const [zoom, setZoomState] = useState(1.0)
 
   useEffect(() => {
     try {
       const z = Number(localStorage.getItem("bsprep:quiz:zoom"))
-      if (z >= 0.9 && z <= 1.6) setZoomState(z)
+      if (z >= 0.85 && z <= 1.4) setZoomState(z)
     } catch {}
   }, [])
   const setZoom = (z: number) => {
-    const next = Math.min(1.6, Math.max(0.9, Math.round(z * 100) / 100))
+    const next = Math.min(1.4, Math.max(0.85, Math.round(z * 100) / 100))
     setZoomState(next)
     try {
       localStorage.setItem("bsprep:quiz:zoom", String(next))
@@ -132,106 +140,106 @@ export function Player({
 
   const answered = test.questions.filter((_, i) => isAnswered(session.responses[i])).length
   const unanswered = total - answered
+  const lowTime = remainingSec !== null && remainingSec <= 600
+  const critical = remainingSec !== null && remainingSec <= 120
   const range = ranges.get(session.current)
-  const marked = session.marked
-  const isMarked = marked.includes(session.current)
-  const iconBtn = "grid size-9 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
 
-  const stateOf = (i: number) => (i === session.current ? "current" : isAnswered(session.responses[i]) ? "answered" : "new")
-  const cell = (state: string) =>
-    cn(
-      "relative grid h-9 w-full place-items-center rounded-lg border text-sm font-bold transition-colors",
-      state === "current" && "border-primary bg-primary text-primary-foreground",
-      state === "answered" && "border-primary/30 bg-primary/15 text-primary hover:bg-primary/25",
-      state === "new" && "bg-card text-muted-foreground hover:bg-muted/60",
-    )
+  const paletteGrid = (
+    <div className="grid grid-cols-5 gap-1.5">
+      {test.questions.map((_, i) => {
+        const done = isAnswered(session.responses[i])
+        const marked = session.marked.includes(i)
+        const isCurrent = i === session.current
+        return (
+          <button
+            key={i}
+            onClick={() => {
+              go(i)
+              setPalette(false)
+            }}
+            aria-label={`Question ${i + 1}${done ? ", answered" : ""}${marked ? ", marked" : ""}`}
+            className={cn(
+              "relative grid h-8 place-items-center rounded-lg border text-xs font-bold transition-all",
+              isCurrent && "border-[#0a192f] ring-2 ring-[#0a192f] ring-offset-1 font-black",
+              done
+                ? "bg-[#0a192f] text-white border-[#0a192f]"
+                : "border-black/10 bg-white text-foreground hover:bg-black/5",
+              marked && !done && "border-amber-400 bg-amber-50 text-amber-900"
+            )}
+          >
+            {i + 1}
+            {marked && (
+              <span className="absolute -right-1 -top-1 size-2 rounded-full bg-amber-500 ring-2 ring-white" />
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
 
-  const palette = (onPick: (i: number) => void) => (
-    <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-5 lg:grid-cols-4">
-      {test.questions.map((_, i) => (
-        <button key={i} onClick={() => onPick(i)} aria-label={`Question ${i + 1}${isAnswered(session.responses[i]) ? ", answered" : ""}${marked.includes(i) ? ", marked" : ""}`} className={cell(stateOf(i))}>
-          {i + 1}
-          {marked.includes(i) && <Flag className="absolute -right-1 -top-1 size-3.5 fill-chart-2 text-chart-2" />}
-        </button>
-      ))}
+  const legend = (
+    <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-muted-foreground border-t border-black/5 pt-2.5">
+      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded bg-[#0a192f]" /> Answered ({answered})</span>
+      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded border border-black/20 bg-white" /> Skipped ({unanswered})</span>
+      <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-amber-500" /> Review ({session.marked.length})</span>
+    </div>
+  )
+
+  const info = (
+    <div className="rounded-xl border border-black/5 bg-muted/30 p-3 space-y-1.5 text-xs">
+      <div className="flex justify-between gap-2"><span className="text-muted-foreground">Exam</span><span className="text-right font-bold truncate max-w-[150px]">{test.title}</span></div>
+      <div className="flex justify-between gap-2"><span className="text-muted-foreground">Paper</span><span className="text-right font-bold truncate max-w-[150px]">{test.subtitle}</span></div>
+      <div className="flex justify-between gap-2"><span className="text-muted-foreground">Total marks</span><span className="font-bold">{test.totalMarks}</span></div>
     </div>
   )
 
   return (
     <div className="lms fixed inset-0 z-[60] flex flex-col bg-background text-foreground">
-      <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-3 border-b px-3 sm:px-4">
-        <div className="flex min-w-0 items-center gap-2">
-          <button onClick={() => setConfirm("exit")} className={iconBtn} aria-label="Leave test">
-            <X className="size-5" />
+      <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-black/10 bg-white px-4 sm:px-6 shadow-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <button onClick={() => setConfirm("exit")} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-black/5 hover:text-foreground" aria-label="Leave test">
+            <X className="size-4" />
           </button>
-          <div className="min-w-0 leading-tight">
-            <p className="truncate text-sm font-bold">{test.title}</p>
-            <p className="truncate text-xs text-muted-foreground">{test.subtitle} · {test.totalMarks} marks</p>
-          </div>
+          <p className="truncate text-xs sm:text-sm font-bold text-foreground">{test.title}</p>
         </div>
-        <TimerPill remainingSec={remainingSec} elapsedSec={elapsedSec} totalSec={limitMs ? limitMs / 1000 : null} />
-        <div className="flex items-center justify-end gap-1">
-          <div className="hidden items-center rounded-lg border bg-card sm:flex">
-            <button onClick={() => setZoom(zoom - 0.1)} disabled={zoom <= 0.9} className="grid size-9 place-items-center rounded-l-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40" aria-label="Smaller text" title="Smaller text">
-              <ZoomOut className="size-4" />
+        <div className="flex items-center gap-2">
+          <TimerPill remainingSec={remainingSec} elapsedSec={elapsedSec} totalSec={limitMs ? limitMs / 1000 : null} />
+          <div className="flex items-center rounded-lg border border-black/10 bg-card">
+            <button onClick={() => setZoom(zoom - 0.05)} disabled={zoom <= 0.85} className="grid size-8 place-items-center rounded-l-lg text-muted-foreground hover:bg-black/5 disabled:opacity-30" aria-label="Smaller text" title="Zoom out">
+              <ZoomOut className="size-3.5" />
             </button>
-            <button onClick={() => setZoom(zoom + 0.1)} disabled={zoom >= 1.6} className="grid size-9 place-items-center rounded-r-lg border-l text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40" aria-label="Larger text" title="Larger text">
-              <ZoomIn className="size-4" />
+            <button onClick={() => setZoom(zoom + 0.05)} disabled={zoom >= 1.4} className="grid size-8 place-items-center rounded-r-lg border-l border-black/10 text-muted-foreground hover:bg-black/5 disabled:opacity-30" aria-label="Larger text" title="Zoom in">
+              <ZoomIn className="size-3.5" />
             </button>
           </div>
-          <button onClick={() => setCalc((c) => !c)} aria-pressed={calc} className={cn(iconBtn, calc && "bg-muted text-foreground")} aria-label="Calculator" title="Calculator">
-            <Calculator className="size-4" />
+          <button onClick={() => setCalc((c) => !c)} aria-pressed={calc} className={cn("grid size-8 place-items-center rounded-lg border border-black/10 transition-colors", calc ? "bg-[#0a192f] text-white" : "text-muted-foreground hover:bg-black/5 hover:text-foreground")} aria-label="Calculator" title="Calculator">
+            <Calculator className="size-3.5" />
           </button>
-          <button onClick={toggleFullscreen} className={cn(iconBtn, "hidden sm:grid")} aria-label="Toggle full screen" title="Full screen">
-            {fullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+          <button onClick={toggleFullscreen} className="hidden size-8 place-items-center rounded-lg border border-black/10 text-muted-foreground hover:bg-black/5 sm:grid" aria-label="Toggle full screen" title="Full screen">
+            {fullscreen ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
+          </button>
+          <button onClick={() => setConfirm("submit")} disabled={submitting} className={cn(btnPrimary, "h-8 px-3 text-xs")}>
+            {submitting ? "Submitting" : "Submit"}
           </button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1 gap-2 bg-muted/60 p-2">
-        <aside className="hidden w-[176px] shrink-0 flex-col overflow-hidden rounded-xl border bg-card lg:flex">
-          <div className="flex items-center justify-between px-3 pb-1 pt-3">
-            <p className="text-xs font-bold">Questions</p>
-            <p className="text-xs tabular-nums text-muted-foreground">{session.current + 1} / {total}</p>
+      <div className="flex min-h-0 flex-1">
+        <aside className="hidden w-72 shrink-0 space-y-4 overflow-y-auto border-r border-black/10 bg-white p-4 lg:block">
+          {info}
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Question Navigator</p>
+            {paletteGrid}
+            {legend}
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 pt-1">{palette((i) => go(i))}</div>
-          <dl className="space-y-0.5 border-t p-2 text-xs">
-            <div className="flex items-center gap-2 rounded-md px-1.5 py-1.5">
-              <span className="size-3.5 rounded border border-primary/30 bg-primary/15" />
-              <dt className="flex-1 font-medium text-muted-foreground">Answered</dt>
-              <dd className="font-bold tabular-nums">{answered}</dd>
-            </div>
-            <div className="flex items-center gap-2 rounded-md px-1.5 py-1.5">
-              <span className="size-3.5 rounded border bg-card" />
-              <dt className="flex-1 font-medium text-muted-foreground">Not answered</dt>
-              <dd className="font-bold tabular-nums">{unanswered}</dd>
-            </div>
-            <div className="flex items-center gap-2 rounded-md px-1.5 py-1.5">
-              <Flag className="size-3.5 fill-chart-2 text-chart-2" />
-              <dt className="flex-1 font-medium text-muted-foreground">Marked</dt>
-              <dd className="font-bold tabular-nums">{marked.length}</dd>
-            </div>
-          </dl>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            Shortcuts: Arrow keys to switch questions. Press <kbd className="rounded border px-1 py-0.5 font-mono text-[10px]">M</kbd> to mark for review.
+          </p>
         </aside>
-
-        <section className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card">
-          <div className="flex h-11 shrink-0 items-center gap-2 border-b bg-muted/40 px-4">
-            <p className="text-sm font-bold">Question {session.current + 1} <span className="font-medium text-muted-foreground">/ {total}</span></p>
-            <Tag>{TYPE_LABEL[q.type]}</Tag>
-            <Tag>{q.marks} {q.marks === 1 ? "mark" : "marks"}</Tag>
-            {q.type === "MSQ" && <span className="hidden text-xs text-muted-foreground sm:inline">Select all that apply</span>}
-            <button
-              onClick={toggleMark}
-              aria-pressed={isMarked}
-              title="Mark for review (M)"
-              className={cn("ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-sm font-semibold hover:bg-muted", isMarked ? "border-chart-2/50 bg-chart-2/15 text-chart-2" : "bg-card text-muted-foreground")}
-            >
-              <Flag className={cn("size-4", isMarked && "fill-chart-2")} /> <span className="hidden sm:inline">{isMarked ? "Marked" : "Mark for review"}</span>
-            </button>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 sm:py-5" style={{ zoom }}>
-              {error && <Notice tone="error" className="mb-4">{error}</Notice>}
+        <main className="min-w-0 flex-1 overflow-y-auto bg-muted/20 p-4 sm:p-6">
+          <div className="mx-auto max-w-3xl" style={{ zoom }}>
+            {error && <Notice tone="error" className="mb-4">{error}</Notice>}
+            <div className="rounded-2xl border border-black/10 bg-white p-5 sm:p-7 shadow-xs">
               <QuestionCard
                 key={q.id + ":" + session.current}
                 question={q}
@@ -239,56 +247,63 @@ export function Player({
                 response={session.responses[session.current]}
                 onChange={setResponse}
                 passageNote={range && range[0] !== range[1] ? `Questions ${range[0] + 1} to ${range[1] + 1} use this passage` : undefined}
-                bare
               />
             </div>
           </div>
-          <div className="flex h-12 shrink-0 items-center gap-2 border-t bg-muted/40 px-3">
-            <button onClick={() => go(session.current - 1)} disabled={session.current === 0} className={cn(btnGhost, "h-8 px-3")}>
-              <ChevronLeft className="size-4" /> <span className="hidden sm:inline">Previous</span>
-            </button>
-            <button onClick={() => go(session.current + 1)} disabled={session.current === total - 1} className={cn(btnGhost, "h-8 px-3")}>
-              <span className="hidden sm:inline">Next</span> <ChevronRight className="size-4" />
-            </button>
-            <span className="ml-auto hidden text-xs text-muted-foreground xl:inline">Arrow keys move · M marks</span>
-            <button onClick={() => setPaletteOpen(true)} className={cn(btnGhost, "ml-auto h-8 px-3 lg:hidden")}>
-              {session.current + 1} / {total}
-            </button>
-            {isAnswered(session.responses[session.current]) && (
-              <button onClick={() => setResponse(q.type === "NUM" ? "" : q.type === "MSQ" ? [] : null)} className="h-8 rounded-lg px-2.5 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground">
-                Clear
-              </button>
-            )}
-            <button onClick={() => setConfirm("submit")} disabled={submitting} className={cn(btnPrimary, "h-8 px-5")}>
-              {submitting ? "Submitting" : "Submit test"}
-            </button>
-          </div>
-        </section>
+        </main>
       </div>
+
+      <footer className="flex h-14 shrink-0 items-center justify-between gap-2 border-t border-black/10 bg-white px-4 sm:px-6 shadow-xs">
+        <button onClick={() => go(session.current - 1)} disabled={session.current === 0} className={cn(btnGhost, "h-8 px-3 text-xs")}>
+          <ChevronLeft className="size-3.5" /> <span className="hidden sm:inline">Previous</span>
+        </button>
+        <button
+          onClick={toggleMark}
+          className={cn(
+            btnGhost,
+            "h-8 px-3 text-xs",
+            session.marked.includes(session.current) && "border-amber-400 bg-amber-50 text-amber-800"
+          )}
+        >
+          <Flag className="size-3.5" /> <span className="hidden sm:inline">{session.marked.includes(session.current) ? "Marked" : "Mark"}</span>
+        </button>
+        {isAnswered(session.responses[session.current]) && (
+          <button
+            onClick={() => setResponse(q.type === "NUM" ? "" : q.type === "MSQ" ? [] : null)}
+            className="h-8 px-2 text-xs font-semibold text-muted-foreground hover:text-foreground"
+          >
+            Clear
+          </button>
+        )}
+        <button onClick={() => setPalette(true)} className={cn(btnGhost, "ml-auto h-8 px-3 text-xs lg:hidden")}>
+          {session.current + 1} / {total}
+        </button>
+        <button onClick={() => go(session.current + 1)} disabled={session.current === total - 1} className={cn(btnPrimary, "h-8 px-3 text-xs lg:ml-auto")}>
+          <span className="hidden sm:inline">Next</span> <ChevronRight className="size-3.5" />
+        </button>
+      </footer>
 
       {calc && <CalculatorPanel onClose={() => setCalc(false)} />}
 
-      <Modal open={paletteOpen} onClose={() => setPaletteOpen(false)} title="Questions">
-        {palette((i) => {
-          go(i)
-          setPaletteOpen(false)
-        })}
+      <Modal open={palette} onClose={() => setPalette(false)} title="Question menu">
+        {paletteGrid}
+        {legend}
       </Modal>
 
-      {confirm === "submit" && (
-        <ReviewDialog
-          total={total}
-          answered={answered}
-          marked={marked.length}
-          states={test.questions.map((_, i) => ({ done: isAnswered(session.responses[i]), marked: marked.includes(i) }))}
-          onJump={(i) => {
-            go(i)
-            setConfirm(null)
-          }}
-          onSubmit={finish}
-          onClose={() => setConfirm(null)}
-        />
-      )}
+      <ConfirmDialog
+        open={confirm === "submit"}
+        title="Submit your test?"
+        body={
+          <div className="flex flex-wrap justify-center gap-2 text-xs font-semibold">
+            <span className="rounded-lg bg-chart-4/10 px-2.5 py-1 text-chart-4">{answered} answered</span>
+            <span className="rounded-lg bg-muted px-2.5 py-1 text-muted-foreground">{unanswered} skipped</span>
+            {session.marked.length > 0 && <span className="rounded-lg bg-chart-2/15 px-2.5 py-1 text-chart-2">{session.marked.length} marked</span>}
+          </div>
+        }
+        primary={{ label: "Submit", onClick: finish }}
+        secondary={{ label: "Keep working", onClick: () => setConfirm(null) }}
+        onClose={() => setConfirm(null)}
+      />
 
       <ConfirmDialog
         open={confirm === "exit"}
@@ -299,59 +314,6 @@ export function Player({
         danger={{ label: "Discard this test", onClick: onExit }}
         onClose={() => setConfirm(null)}
       />
-    </div>
-  )
-}
-
-/** A popup over the dimmed test: how many answered, which are left, and a map to jump back to any question. */
-function ReviewDialog({ total, answered, marked, states, onJump, onSubmit, onClose }: {
-  total: number
-  answered: number
-  marked: number
-  states: { done: boolean; marked: boolean }[]
-  onJump: (i: number) => void
-  onSubmit: () => void
-  onClose: () => void
-}) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose()
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [onClose])
-
-  const left = total - answered
-  return (
-    <div className="fixed inset-0 z-[70] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label="Review your answers" onClick={(e) => e.stopPropagation()} className="flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-2xl">
-        <div className="border-b px-6 py-5">
-          <h2 className="text-xl font-extrabold tracking-tight">Review before you submit</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{left === 0 ? "Every question has an answer." : `${left} ${left === 1 ? "question has" : "questions have"} no answer yet.`} Tap a number to go back to it.</p>
-        </div>
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl bg-primary/10 p-3"><p className="text-2xl font-extrabold tabular-nums text-primary">{answered}</p><p className="text-[11px] font-semibold text-muted-foreground">Answered</p></div>
-            <div className="rounded-xl bg-muted p-3"><p className="text-2xl font-extrabold tabular-nums">{left}</p><p className="text-[11px] font-semibold text-muted-foreground">Not answered</p></div>
-            <div className="rounded-xl bg-chart-2/15 p-3"><p className="text-2xl font-extrabold tabular-nums text-chart-2">{marked}</p><p className="text-[11px] font-semibold text-muted-foreground">Marked</p></div>
-          </div>
-          <div className="grid grid-cols-6 gap-1.5 sm:grid-cols-8">
-            {states.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => onJump(i)}
-                aria-label={`Question ${i + 1}${s.done ? ", answered" : ", not answered"}${s.marked ? ", marked" : ""}`}
-                className={cn("relative grid h-9 place-items-center rounded-lg border text-sm font-bold transition-colors", s.done ? "border-primary/30 bg-primary/15 text-primary hover:bg-primary/25" : "bg-card text-muted-foreground hover:bg-muted/60")}
-              >
-                {i + 1}
-                {s.marked && <Flag className="absolute -right-1 -top-1 size-3.5 fill-chart-2 text-chart-2" />}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 border-t px-6 py-4">
-          <button className={btnGhost} onClick={onClose}>Keep working</button>
-          <button className={cn(btnPrimary, "ml-auto px-6")} onClick={onSubmit} autoFocus>Submit test</button>
-        </div>
-      </div>
     </div>
   )
 }
