@@ -28,7 +28,6 @@ next-env.d.ts
 
 # supabase scripts
 /supabase
-config.bat
 
 
 api-routes.md
